@@ -1,0 +1,251 @@
+@model IEnumerable<HRManagementSystem.Models.LeaveApplication>
+
+@{
+    ViewData["Title"] = "Manager Dashboard - Leave Approvals";
+    var manager = ViewBag.Manager as HRManagementSystem.Models.Employee;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-tasks"></i> Leave Approvals Dashboard</h2>
+    <div class="d-flex gap-2">
+        <a asp-action="MyLeave" class="btn btn-outline-primary">
+            <i class="fas fa-calendar-check"></i> My Leave
+        </a>
+        <a asp-action="Apply" class="btn btn-primary">
+            <i class="fas fa-calendar-plus"></i> Apply for Leave
+        </a>
+    </div>
+</div>
+
+<!-- Manager Info Card -->
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h5><i class="fas fa-user-tie"></i> Manager: @manager?.FullName</h5>
+                <p class="mb-0 text-muted">
+                    @manager?.JobTitle - @manager?.Department?.Name
+                </p>
+            </div>
+            <div class="col-md-4 text-end">
+                <div class="badge bg-warning fs-6">
+                    @Model.Count() Pending Approval@(Model.Count() != 1 ? "s" : "")
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (!Model.Any())
+{
+    <!-- No Pending Applications -->
+    <div class="card">
+        <div class="card-body text-center py-5">
+            <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+            <h4>All Caught Up!</h4>
+            <p class="text-muted mb-0">There are no pending leave applications requiring your approval at this time.</p>
+        </div>
+    </div>
+}
+else
+{
+    <!-- Pending Applications -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-clock"></i> Pending Leave Applications</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Employee</th>
+                            <th>Leave Type</th>
+                            <th>Period</th>
+                            <th>Days</th>
+                            <th>Applied</th>
+                            <th>Reason</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var application in Model.OrderBy(a => a.AppliedDate))
+                        {
+                            <tr>
+                                <td>
+                                    <div>
+                                        <strong>@application.Employee.FullName</strong>
+                                        <br>
+                                        <small class="text-muted">@application.Employee.JobTitle</small>
+                                        <br>
+                                        <small class="text-muted">@application.Employee.Department?.Name</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge @application.LeaveType.Color">
+                                        @application.LeaveType.Name
+                                    </span>
+                                    @if (!application.LeaveType.IsPaid)
+                                    {
+                                        <br><span class="badge bg-warning">Unpaid</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div>
+                                        <strong>@application.StartDate.ToString("dd MMM")</strong>
+                                        <br>
+                                        <span class="text-muted">to</span>
+                                        <br>
+                                        <strong>@application.EndDate.ToString("dd MMM yyyy")</strong>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">@application.TotalDays days</span>
+                                </td>
+                                <td>
+                                    <div>
+                                        @application.AppliedDate.ToString("dd MMM")
+                                        <br>
+                                        <small class="text-muted">@application.AppliedDate.ToString("HH:mm")</small>
+                                        @if ((DateTime.Now - application.AppliedDate).TotalDays > 2)
+                                        {
+                                            <br><span class="badge bg-warning">Overdue</span>
+                                        }
+                                    </div>
+                                </td>
+                                <td>
+                                    <div style="max-width: 200px;">
+                                        <span class="text-truncate d-block" title="@application.Reason">
+                                            @application.Reason
+                                        </span>
+                                        @if (!string.IsNullOrEmpty(application.SupportingDocumentPath))
+                                        {
+                                            <br>
+                                            <a href="@application.SupportingDocumentPath" target="_blank" class="text-primary">
+                                                <i class="fas fa-paperclip"></i> Document
+                                            </a>
+                                        }
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="btn-group-vertical btn-group-sm">
+                                        <a asp-action="Details" asp-route-id="@application.LeaveApplicationId" 
+                                           class="btn btn-outline-info" title="View Details">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                        
+                                        <div class="btn-group btn-group-sm">
+                                            <button type="button" class="btn btn-success" 
+                                                    onclick="quickApprove(@application.LeaveApplicationId, '@application.Employee.FullName')"
+                                                    title="Quick Approve">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-danger" 
+                                                    onclick="showRejectModal(@application.LeaveApplicationId, '@application.Employee.FullName')"
+                                                    title="Reject">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Quick Actions Hidden Forms -->
+<form id="approveForm" asp-action="Approve" method="post" style="display: none;">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="id" id="approveId" />
+    <input type="hidden" name="comments" value="Quick approved by manager" />
+</form>
+
+<!-- Reject Modal -->
+<div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="Reject" method="post" id="rejectForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" id="rejectId" />
+                
+                <div class="modal-header">
+                    <h5 class="modal-title" id="rejectModalLabel">
+                        <i class="fas fa-times-circle text-danger"></i> Reject Leave Application
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        You are about to reject the leave application for <strong id="rejectEmployeeName"></strong>.
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="rejectComments" class="form-label">
+                            <i class="fas fa-comment"></i> Reason for Rejection <span class="text-danger">*</span>
+                        </label>
+                        <textarea name="comments" id="rejectComments" class="form-control" rows="4" 
+                                  placeholder="Please provide a clear reason for rejecting this leave application..." required></textarea>
+                        <div class="form-text">This message will be visible to the employee.</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-times-circle"></i> Reject Application
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function quickApprove(applicationId, employeeName) {
+        if (confirm(`Are you sure you want to approve the leave application for ${employeeName}?`)) {
+            document.getElementById('approveId').value = applicationId;
+            document.getElementById('approveForm').submit();
+        }
+    }
+
+    function showRejectModal(applicationId, employeeName) {
+        document.getElementById('rejectId').value = applicationId;
+        document.getElementById('rejectEmployeeName').textContent = employeeName;
+        document.getElementById('rejectComments').value = '';
+        
+        const modal = new bootstrap.Modal(document.getElementById('rejectModal'));
+        modal.show();
+    }
+
+    // Auto-refresh every 5 minutes to show new applications
+    setTimeout(function() {
+        location.reload();
+    }, 300000); // 5 minutes
+</script>
+
+<style>
+    .fas {
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+    }
+    
+    .table td {
+        vertical-align: middle;
+    }
+    
+    .btn-group-vertical .btn {
+        margin-bottom: 2px;
+    }
+    
+    .text-truncate {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+</style>

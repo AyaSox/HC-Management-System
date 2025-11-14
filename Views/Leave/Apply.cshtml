@@ -1,0 +1,255 @@
+@model HRManagementSystem.Models.LeaveApplication
+
+@{
+    ViewData["Title"] = "Apply for Leave";
+    var employee = ViewBag.Employee as HRManagementSystem.Models.Employee;
+    var leaveTypes = ViewBag.LeaveTypes as List<HRManagementSystem.Models.LeaveType> ?? new List<HRManagementSystem.Models.LeaveType>();
+    var leaveBalances = ViewBag.LeaveBalances as List<HRManagementSystem.Models.LeaveBalance> ?? new List<HRManagementSystem.Models.LeaveBalance>();
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-calendar-plus"></i> Apply for Leave</h2>
+    <a asp-action="MyLeave" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to My Leave
+    </a>
+</div>
+
+<!-- Leave Balances Overview -->
+<div class="card mb-4">
+    <div class="card-header bg-info text-white">
+        <h5 class="mb-0"><i class="fas fa-chart-pie"></i> Current Leave Balance</h5>
+    </div>
+    <div class="card-body">
+        @if (leaveBalances.Any())
+        {
+            <div class="row">
+                @foreach (var balance in leaveBalances.Take(4))
+                {
+                    <div class="col-md-3 mb-3">
+                        <div class="card h-100 @balance.LeaveType.Color">
+                            <div class="card-body text-white text-center">
+                                <h6>@balance.LeaveType.Name</h6>
+                                <h4>@balance.AvailableDays</h4>
+                                <small>Available Days</small>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info mb-0">
+                <i class="fas fa-info-circle"></i> Your leave balances will be initialized after your first application.
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Leave Application Form -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-edit"></i> Leave Application Form</h5>
+    </div>
+    <div class="card-body">
+            <form asp-action="Apply" method="post" enctype="multipart/form-data" id="leaveForm" onsubmit="return validateForm()">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+            
+            <input type="hidden" asp-for="EmployeeId" />
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label asp-for="LeaveTypeId" class="form-label">
+                        <i class="fas fa-list"></i> Leave Type <span class="text-danger">*</span>
+                    </label>
+                    <select asp-for="LeaveTypeId" class="form-select" id="leaveTypeSelect" onchange="updateLeaveBalance()">
+                        <option value="">Select a leave type</option>
+                        @foreach (var leaveType in leaveTypes)
+                        {
+                            <option value="@leaveType.LeaveTypeId" 
+                                    data-requires-approval="@leaveType.RequiresApproval.ToString().ToLower()"
+                                    data-is-paid="@leaveType.IsPaid.ToString().ToLower()">
+                                @leaveType.Name @(!leaveType.IsPaid ? "(Unpaid)" : "")
+                            </option>
+                        }
+                    </select>
+                    <span asp-validation-for="LeaveTypeId" class="text-danger"></span>
+                    <div class="form-text" id="leaveTypeInfo"></div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card bg-light" id="balanceCard" style="display: none;">
+                        <div class="card-body">
+                            <h6>Available Balance</h6>
+                            <div id="availableBalance" class="h4 text-primary">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label asp-for="StartDate" class="form-label">
+                        <i class="fas fa-calendar-alt"></i> Start Date <span class="text-danger">*</span>
+                    </label>
+                    <input asp-for="StartDate" type="date" class="form-control" id="startDate" min="@DateTime.Today.ToString("yyyy-MM-dd")" onchange="calculateDays()">
+                    <span asp-validation-for="StartDate" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="EndDate" class="form-label">
+                        <i class="fas fa-calendar-alt"></i> End Date <span class="text-danger">*</span>
+                    </label>
+                    <input asp-for="EndDate" type="date" class="form-control" id="endDate" min="@DateTime.Today.ToString("yyyy-MM-dd")" onchange="calculateDays()">
+                    <span asp-validation-for="EndDate" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-12">
+                    <div class="alert alert-light border" id="daysCalculation" style="display: none;">
+                        <i class="fas fa-calculator"></i>
+                        <strong>Total Days:</strong> <span id="totalDays">0</span> weekdays
+                        <small class="text-muted">(Weekends excluded)</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Reason" class="form-label">
+                    <i class="fas fa-comment"></i> Reason for Leave <span class="text-danger">*</span>
+                </label>
+                <textarea asp-for="Reason" class="form-control" rows="4" placeholder="Please provide a detailed reason for your leave request..."></textarea>
+                <span asp-validation-for="Reason" class="text-danger"></span>
+                <div class="form-text">This information will be reviewed by your line manager.</div>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="ContactDuringLeave" class="form-label">
+                    <i class="fas fa-phone"></i> Contact Information During Leave
+                </label>
+                <input asp-for="ContactDuringLeave" type="text" class="form-control" placeholder="Phone number or email for emergencies">
+                <span asp-validation-for="ContactDuringLeave" class="text-danger"></span>
+                <div class="form-text">Optional: Provide contact details for urgent matters.</div>
+            </div>
+
+            <div class="mb-3">
+                <label for="supportingDocument" class="form-label">
+                    <i class="fas fa-paperclip"></i> Supporting Document
+                </label>
+                <input type="file" name="supportingDocument" id="supportingDocument" class="form-control" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                <div class="form-text">Optional: Upload medical certificate, travel documents, etc. (PDF, DOC, JPG, PNG)</div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="d-grid gap-2 d-md-flex">
+                        <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                            <i class="fas fa-paper-plane"></i> Submit Leave Application
+                        </button>
+                        <a asp-action="MyLeave" class="btn btn-secondary btn-lg">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Leave balances data
+    const leaveBalances = @Html.Raw(Json.Serialize(leaveBalances.ToDictionary(b => b.LeaveTypeId, b => new { b.AvailableDays, b.LeaveType.Name })));
+
+    function updateLeaveBalance() {
+        const select = document.getElementById('leaveTypeSelect');
+        const balanceCard = document.getElementById('balanceCard');
+        const availableBalance = document.getElementById('availableBalance');
+        const leaveTypeInfo = document.getElementById('leaveTypeInfo');
+        const option = select.options[select.selectedIndex];
+
+        if (select.value && leaveBalances[select.value]) {
+            const balance = leaveBalances[select.value];
+            availableBalance.textContent = balance.AvailableDays + ' days';
+            balanceCard.style.display = 'block';
+            
+            const requiresApproval = option.getAttribute('data-requires-approval') === 'true';
+            const isPaid = option.getAttribute('data-is-paid') === 'true';
+            
+            let infoText = '';
+            if (requiresApproval) infoText += 'Requires manager approval. ';
+            if (!isPaid) infoText += 'This is unpaid leave. ';
+            
+            leaveTypeInfo.textContent = infoText;
+        } else {
+            balanceCard.style.display = 'none';
+            leaveTypeInfo.textContent = '';
+        }
+        
+        calculateDays();
+    }
+
+    function calculateDays() {
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        const daysCalculation = document.getElementById('daysCalculation');
+        const totalDaysSpan = document.getElementById('totalDays');
+        const submitBtn = document.getElementById('submitBtn');
+
+        if (startDate && endDate) {
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            
+            if (start <= end) {
+                let weekdays = 0;
+                const currentDate = new Date(start);
+                
+                while (currentDate <= end) {
+                    const dayOfWeek = currentDate.getDay();
+                    if (dayOfWeek !== 0 && dayOfWeek !== 6) { // Not Sunday (0) or Saturday (6)
+                        weekdays++;
+                    }
+                    currentDate.setDate(currentDate.getDate() + 1);
+                }
+                
+                totalDaysSpan.textContent = weekdays;
+                daysCalculation.style.display = 'block';
+                
+                // Check if sufficient balance
+                const select = document.getElementById('leaveTypeSelect');
+                if (select.value && leaveBalances[select.value]) {
+                    const availableDays = leaveBalances[select.value].AvailableDays;
+                    if (weekdays > availableDays) {
+                        daysCalculation.className = 'alert alert-danger border';
+                        totalDaysSpan.innerHTML = weekdays + ' <small>(Exceeds available balance: ' + availableDays + ' days)</small>';
+                        submitBtn.disabled = true;
+                    } else {
+                        daysCalculation.className = 'alert alert-success border';
+                        submitBtn.disabled = false;
+                    }
+                }
+            } else {
+                daysCalculation.style.display = 'none';
+                submitBtn.disabled = false;
+            }
+        } else {
+            daysCalculation.style.display = 'none';
+            submitBtn.disabled = false;
+        }
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+        updateLeaveBalance();
+        calculateDays();
+    });
+</script>
+
+<style>
+    .fas {
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+    }
+    
+    .form-label .text-danger {
+        font-weight: bold;
+    }
+</style>

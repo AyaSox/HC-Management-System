@@ -1,0 +1,204 @@
+@{
+    ViewData["Title"] = "Organization Chart";
+    var orgData = ViewBag.OrgData as string;
+    var totalEmployees = ViewBag.TotalEmployees as int? ?? 0;
+    var departmentCount = ViewBag.DepartmentCount as int? ?? 0;
+    var departmentName = ViewBag.DepartmentName as string;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1><i class="fas fa-sitemap"></i> 
+            @if (!string.IsNullOrEmpty(departmentName))
+            {
+                @departmentName <span class="text-muted">Organization Chart</span>
+            }
+            else
+            {
+                @:Organization Chart
+            }
+        </h1>
+        <p class="text-muted mb-0">
+            @if (!string.IsNullOrEmpty(departmentName))
+            {
+                <span>@totalEmployees employees in @departmentName</span>
+            }
+            else
+            {
+                <span>@totalEmployees employees across @departmentCount departments</span>
+            }
+        </p>
+    </div>
+    <div class="btn-group">
+        <button class="btn btn-outline-primary" onclick="toggleView()">
+            <i class="fas fa-exchange-alt"></i> <span id="viewToggle">Tree View</span>
+        </button>
+        <div class="btn-group">
+            <button class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown">
+                <i class="fas fa-download"></i> Download
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#" onclick="downloadOrgChart('png')">
+                    <i class="fas fa-image"></i> PNG Image
+                </a></li>
+                <li><a class="dropdown-item" href="#" onclick="downloadOrgChart('pdf')">
+                    <i class="fas fa-file-pdf"></i> PDF Document
+                </a></li>
+                <li><a class="dropdown-item" href="#" onclick="printOrgChart()">
+                    <i class="fas fa-print"></i> Print
+                </a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Filter and Search Controls -->
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">Search Employee</label>
+                <input type="text" id="searchEmployee" class="form-control" placeholder="Search by name or title..." oninput="filterChanged()">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Filter by Department</label>
+                <select id="departmentFilter" class="form-select" onchange="filterChanged()">
+                    <option value="">All Departments</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Filter by Status</label>
+                <select id="statusFilter" class="form-select" onchange="filterChanged()">
+                    <option value="">All Status</option>
+                    <option value="Active">Active</option>
+                    <option value="OnLeave">On Leave</option>
+                    <option value="Inactive">Inactive</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button class="btn btn-outline-secondary w-100" onclick="clearFilters()">
+                    <i class="fas fa-times"></i> Clear
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Organization Chart Container -->
+<div class="card">
+    <div class="card-body">
+        <!-- List View (Default) -->
+        <div id="listView">
+            <div id="orgChartList"></div>
+        </div>
+        
+        <!-- Tree View (Alternative) -->
+        <div id="treeView" style="display: none;">
+            <div id="orgChartTree" style="min-height: 600px; overflow: auto;"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Employee Details Modal -->
+<div class="modal fade" id="employeeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Employee Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="employeeDetails"></div>
+            </div>
+            <div class="modal-footer">
+                <a id="viewEmployeeBtn" href="#" class="btn btn-primary">View Full Profile</a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (string.IsNullOrEmpty(departmentName))
+{
+    <div class="mt-3">
+        <a asp-controller="Departments" asp-action="Index" class="btn btn-outline-secondary">
+            <i class="fas fa-building"></i> View by Department
+        </a>
+        <a asp-controller="Employees" asp-action="Index" class="btn btn-outline-secondary">
+            <i class="fas fa-users"></i> Employee List
+        </a>
+    </div>
+}
+else
+{
+    <div class="mt-3">
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="fas fa-sitemap"></i> Full Organization Chart
+        </a>
+        <a asp-controller="Departments" asp-action="Index" class="btn btn-outline-secondary">
+            <i class="fas fa-building"></i> All Departments
+        </a>
+    </div>
+}
+
+<!-- Embedded org data as JSON for safe parsing -->
+<script id="org-data" type="application/json">@Html.Raw(orgData ?? "[]")</script>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="~/js/orgchart.js" asp-append-version="true"></script>
+    <script>
+        // Debug: log the embedded data
+        console.log('Checking embedded data...');
+        const dataEl = document.getElementById('org-data');
+        if (dataEl) {
+            console.log('Data element found:', dataEl.textContent);
+        } else {
+            console.log('Data element NOT found');
+        }
+
+        // Global bridges for inline onclick handlers
+        window.toggleView = function(){ if (window.OrgChart) window.OrgChart.toggleView(); };
+        window.downloadOrgChart = function(fmt){ if (window.OrgChart) window.OrgChart.downloadOrgChart(fmt); };
+        window.printOrgChart = function(){ if (window.OrgChart) window.OrgChart.printOrgChart(); };
+        window.clearFilters = function(){ if (window.OrgChart) window.OrgChart.clearFilters(); };
+        window.filterChanged = function(){ if (window.OrgChart) window.OrgChart.filterChart(); };
+
+        document.addEventListener('DOMContentLoaded', function(){
+            let data = [];
+            try {
+                const dataEl = document.getElementById('org-data');
+                if (dataEl && dataEl.textContent) {
+                    data = JSON.parse(dataEl.textContent);
+                    console.log('Parsed data:', data);
+                } else {
+                    console.log('No data element or content found');
+                }
+            } catch (e) { 
+                console.error('Error parsing data:', e);
+                data = []; 
+            }
+            
+            console.log('Initializing OrgChart with:', data.length, 'employees');
+            if (window.OrgChart) {
+                window.OrgChart.init(data);
+            } else {
+                console.error('OrgChart module not loaded');
+            }
+        });
+    </script>
+}
+
+<style>
+    .fas { font-family: "Font Awesome 5 Free"; font-weight: 900; }
+    .org-employee { transition: all 0.3s ease; }
+    .org-employee:hover { transform: translateX(5px); }
+    .org-children { transition: all 0.3s ease; }
+    .level-0 .card { border-left: 4px solid #007bff; }
+    .level-1 .card { border-left: 4px solid #28a745; }
+    .level-2 .card { border-left: 4px solid #ffc107; }
+    .level-3 .card { border-left: 4px solid #dc3545; }
+    /* Light tweak for inline icons within foreignObject */
+    #orgChartTree i.fas { line-height: 1; }
+</style>

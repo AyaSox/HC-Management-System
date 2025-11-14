@@ -1,0 +1,124 @@
+@model IEnumerable<HRManagementSystem.Models.StatusChangeRequest>
+
+@{
+    ViewData["Title"] = "Pending Status Changes";
+}
+
+<h2><i class="fas fa-clipboard-list"></i> Pending Status Change Requests</h2>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i>
+        No pending status change requests at this time.
+    </div>
+}
+else
+{
+    <div class="alert alert-warning">
+        <i class="fas fa-exclamation-triangle"></i>
+        <strong>@Model.Count()</strong> status change request(s) require your approval.
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Employee</th>
+                            <th>Current Status</th>
+                            <th>Requested Status</th>
+                            <th>Reason</th>
+                            <th>Requested By</th>
+                            <th>Date Requested</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var request in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@request.Employee.FullName</strong>
+                                    <br>
+                                    <small class="text-muted">@request.Employee.JobTitle</small>
+                                </td>
+                                <td>
+                                    @switch (request.FromStatus)
+                                    {
+                                        case HRManagementSystem.Models.EmployeeStatus.Active:
+                                            <span class="badge bg-success"><i class="fas fa-check-circle"></i> Active</span>
+                                            break;
+                                        case HRManagementSystem.Models.EmployeeStatus.OnLeave:
+                                            <span class="badge bg-warning"><i class="fas fa-clock"></i> On Leave</span>
+                                            break;
+                                        case HRManagementSystem.Models.EmployeeStatus.Inactive:
+                                            <span class="badge bg-danger"><i class="fas fa-times-circle"></i> Inactive</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>
+                                    @switch (request.ToStatus)
+                                    {
+                                        case HRManagementSystem.Models.EmployeeStatus.Active:
+                                            <span class="badge bg-success"><i class="fas fa-check-circle"></i> Active</span>
+                                            break;
+                                        case HRManagementSystem.Models.EmployeeStatus.OnLeave:
+                                            <span class="badge bg-warning"><i class="fas fa-clock"></i> On Leave</span>
+                                            break;
+                                        case HRManagementSystem.Models.EmployeeStatus.Inactive:
+                                            <span class="badge bg-danger"><i class="fas fa-times-circle"></i> Inactive</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>
+                                    <span class="text-truncate d-inline-block" style="max-width: 200px;" title="@request.Reason">
+                                        @request.Reason
+                                    </span>
+                                </td>
+                                <td>@request.RequestedBy</td>
+                                <td>
+                                    @request.RequestedDate.ToString("MMM dd, yyyy")
+                                    <br>
+                                    <small class="text-muted">@request.RequestedDate.ToString("HH:mm")</small>
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a asp-action="Approve" asp-route-id="@request.StatusChangeRequestId" 
+                                           class="btn btn-sm btn-primary" title="Review & Approve">
+                                            <i class="fas fa-eye"></i> Review
+                                        </a>
+                                        <a asp-controller="Employees" asp-action="Details" asp-route-id="@request.EmployeeId" 
+                                           class="btn btn-sm btn-outline-info" title="View Employee Details">
+                                            <i class="fas fa-user"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="mt-3">
+    <a asp-controller="Dashboard" asp-action="Index" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </a>
+</div>
+
+<style>
+    .fas {
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+    }
+    .text-truncate {
+        max-width: 200px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+</style>

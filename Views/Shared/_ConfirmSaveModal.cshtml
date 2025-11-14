@@ -1,0 +1,39 @@
+@* Shared confirmation modal for Create/Edit save actions *@
+<div class="modal fade" id="confirmSaveModal" tabindex="-1" aria-labelledby="confirmSaveLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmSaveLabel"><i class="fas fa-save me-2"></i>Confirm Save</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="confirmCreateSummary" class="mb-2 d-none">
+            <p>Please review the details below. Click Confirm to create this employee.</p>
+            <ul class="list-group" id="confirmCreateList"></ul>
+        </div>
+        <div id="confirmEditSummary" class="d-none">
+            <p class="mb-2">Review the changes you made. Fields not listed remain unchanged.</p>
+            <div id="noChangesNote" class="alert alert-info d-none">No changes detected. Do you still want to save?</div>
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 220px;">Field</th>
+                            <th>Current</th>
+                            <th>New</th>
+                        </tr>
+                    </thead>
+                    <tbody id="changesTbody"></tbody>
+                </table>
+            </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" id="confirmSaveBtn" class="btn btn-primary">
+            <i class="fas fa-check"></i> Confirm & Save
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

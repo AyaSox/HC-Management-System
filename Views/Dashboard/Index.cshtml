@@ -1,0 +1,526 @@
+@using System.Text.Json
+@{
+    ViewData["Title"] = "Dashboard";
+    var deptLabels = JsonSerializer.Serialize(ViewBag.DeptLabels);
+    var deptCounts = JsonSerializer.Serialize(ViewBag.DeptCounts);
+    var genders = JsonSerializer.Serialize(ViewBag.Genders);
+    var genderCounts = JsonSerializer.Serialize(ViewBag.GenderCounts);
+    var statusLabels = JsonSerializer.Serialize(ViewBag.StatusLabels);
+    var statusCounts = JsonSerializer.Serialize(ViewBag.StatusCounts);
+}
+
+<h2 class="mb-4">HR Dashboard</h2>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card p-3 shadow-sm">
+            <div class="h6">Total Employees</div>
+            <div class="display-6 text-primary">@ViewBag.TotalEmployees</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card p-3 shadow-sm">
+            <div class="h6">Departments</div>
+            <div class="display-6 text-success">@ViewBag.TotalDepartments</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card p-3 shadow-sm">
+            <div class="h6">Average Annual Salary</div>
+            <div class="text-info" style="font-size: 2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">@ViewBag.AvgSalary</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card p-3 shadow-sm">
+            <div class="h6">Recent Hires (30 days)</div>
+            <div class="display-6 text-warning">@ViewBag.RecentHiresCount</div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-plane-departure me-1"></i>
+                    Upcoming Leave (next 30 days)
+                </h5>
+            </div>
+            <div class="card-body">
+                @{
+                    var upcomingLeave = (List<HRManagementSystem.Models.LeaveApplication>)ViewBag.UpcomingLeave ?? new();
+                }
+                @if (upcomingLeave.Any())
+                {
+                    <div class="list-group list-group-flush">
+                        @foreach (var item in upcomingLeave)
+                        {
+                            var isOngoing = DateTime.Today >= item.StartDate && DateTime.Today <= item.EndDate;
+                            <div class="list-group-item d-flex justify-content-between align-items-center upcoming-leave-item">
+                                <div>
+                                    <strong style="color:black;">@item.Employee.FullName</strong>
+                                    <br>
+                                    <small class="text-muted">@item.Employee.Department?.Name</small>
+                                </div>
+                                <div class="text-end">
+                                    <small class="badge bg-light text-dark border me-2">@item.LeaveType.Name</small>
+                                    <small class="@(isOngoing ? "text-danger fw-semibold" : "text-muted")">
+                                        @item.StartDate.ToString("MMM dd") - @item.EndDate.ToString("MMM dd")
+                                        @(isOngoing ? " (ongoing)" : "")
+                                    </small>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">No upcoming approved leave in the next 30 days.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- New Widgets Row -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-user-plus"></i> Recent Hires (Last 30 Days)
+                </h5>
+            </div>
+            <div class="card-body">
+                @{
+                    var recentHires = (List<HRManagementSystem.Models.Employee>)ViewBag.RecentHires;
+                }
+                @if (recentHires.Any())
+                {
+                    <div class="list-group list-group-flush">
+                        @foreach (var hire in recentHires)
+                        {
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong style="color: black;">@hire.FullName</strong>
+                                    <br>
+                                    <small class="text-muted">@hire.Department?.Name</small>
+                                </div>
+                                <div class="text-end">
+                                    <small class="text-muted">@hire.DateHired.ToString("MMM dd")</small>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">No recent hires in the last 30 days.</p>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow-sm birthday-widget">
+            <div class="card-header birthday-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-birthday-cake birthday-cake-icon"></i> 
+                    Upcoming Birthdays
+                </h5>
+            </div>
+            <div class="card-body">
+                @{
+                    var upcomingBirthdays = (List<HRManagementSystem.Models.Employee>)ViewBag.UpcomingBirthdays;
+                }
+                @if (upcomingBirthdays.Any())
+                {
+                    <div class="list-group list-group-flush">
+                        @foreach (var birthday in upcomingBirthdays)
+                        {
+                            <div class="list-group-item birthday-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong style="color: black;">@birthday.FullName</strong>
+                                    <br>
+                                    <small class="text-muted">@birthday.Department?.Name</small>
+                                </div>
+                                <div class="text-end">
+                                    @{
+                                        var today = DateTime.Today;
+                                        var nextBirthday = new DateTime(today.Year, birthday.DateOfBirth!.Value.Month, birthday.DateOfBirth.Value.Day);
+                                        if (nextBirthday < today) nextBirthday = nextBirthday.AddYears(1);
+                                        var daysUntil = (nextBirthday - today).Days;
+                                    }
+                                    <small class="text-warning birthday-countdown">
+                                        @if (daysUntil == 0)
+                                        {
+                                            <strong class="birthday-today"><i class="fas fa-trophy"></i> Today! <i class="fas fa-trophy"></i></strong>
+                                        }
+                                        else if (daysUntil == 1)
+                                        {
+                                            <strong class="birthday-tomorrow"><i class="fas fa-birthday-cake"></i> Tomorrow</strong>
+                                        }
+                                        else
+                                        {
+                                            <span class="birthday-days">@daysUntil days</span>
+                                        }
+                                    </small>
+                                    <br>
+                                    <small class="text-muted">@nextBirthday.ToString("MMM dd")</small>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">No upcoming birthdays in the next 30 days.</p>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow-sm anniversary-widget">
+            <div class="card-header anniversary-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-medal anniversary-icon"></i> 
+                    Upcoming Anniversaries
+                    <i class="fas fa-trophy text-warning ms-2"></i>
+                </h5>
+            </div>
+            <div class="card-body">
+                @{
+                    var upcomingAnniversaries = (List<HRManagementSystem.Models.Employee>)ViewBag.UpcomingAnniversaries;
+                }
+                @if (upcomingAnniversaries.Any())
+                {
+                    <div class="list-group list-group-flush">
+                        @foreach (var anniversary in upcomingAnniversaries)
+                        {
+                            <div class="list-group-item anniversary-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong style="color: black;">@anniversary.FullName</strong>
+                                    <br>
+                                    <small class="text-muted">@anniversary.Department?.Name</small>
+                                </div>
+                                <div class="text-end">
+                                    @{
+                                        var today = DateTime.Today;
+                                        var thisYearAnniversary = new DateTime(today.Year, anniversary.DateHired.Month, anniversary.DateHired.Day);
+                                        if (thisYearAnniversary < today) thisYearAnniversary = thisYearAnniversary.AddYears(1);
+                                        var daysUntil = (thisYearAnniversary - today).Days;
+                                        var yearsOfService = thisYearAnniversary.Year - anniversary.DateHired.Year;
+                                    }
+                                    <small class="text-primary anniversary-countdown">
+                                        @if (daysUntil == 0)
+                                        {
+                                            <strong class="anniversary-today"><i class="fas fa-medal me-1"></i> Today! @yearsOfService years</strong>
+                                        }
+                                        else if (daysUntil == 1)
+                                        {
+                                            <strong class="anniversary-tomorrow"><i class="fas fa-hourglass-half me-1"></i> Tomorrow - @yearsOfService years</strong>
+                                        }
+                                        else
+                                        {
+                                            <span class="anniversary-days">@daysUntil days - @yearsOfService years</span>
+                                        }
+                                    </small>
+                                    <br>
+                                    <small class="text-muted">@thisYearAnniversary.ToString("MMM dd")</small>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">No upcoming anniversaries in the next 30 days.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card p-4 shadow-sm mb-4">
+            <h5 class="card-title">Employees per Department</h5>
+            <div style="height: 300px;">
+                <canvas id="deptChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-4 shadow-sm">
+            <h5 class="card-title">Employee Gender Distribution</h5>
+            <div style="height: 300px;">
+                <canvas id="genderChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-4 shadow-sm">
+            <h5 class="card-title">Employee Status</h5>
+            <div style="height: 300px;">
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Employees per Department (bar)
+        new Chart(document.getElementById('deptChart').getContext('2d'), {
+            type: 'bar',
+            data: { 
+                labels: @Html.Raw(deptLabels), 
+                datasets: [{ 
+                    label: 'Employees', 
+                    data: @Html.Raw(deptCounts),
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }] 
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { 
+                        display: false 
+                    }
+                },
+                scales: { 
+                    y: { 
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+
+        // Gender breakdown (doughnut)
+        new Chart(document.getElementById('genderChart').getContext('2d'), {
+            type: 'doughnut',
+            data: { 
+                labels: @Html.Raw(genders), 
+                datasets: [{ 
+                    data: @Html.Raw(genderCounts),
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.8)',
+                        'rgba(54, 162, 235, 0.8)',
+                        'rgba(255, 205, 86, 0.8)',
+                        'rgba(75, 192, 192, 0.8)'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }] 
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // Employee Status (pie)
+        new Chart(document.getElementById('statusChart').getContext('2d'), {
+            type: 'pie',
+            data: { 
+                labels: @Html.Raw(statusLabels), 
+                datasets: [{ 
+                    data: @Html.Raw(statusCounts),
+                    backgroundColor: [
+                        'rgba(40, 167, 69, 0.8)',   // Active - Green
+                        'rgba(255, 193, 7, 0.8)',   // OnLeave - Yellow
+                        'rgba(108, 117, 125, 0.8)'  // Inactive - Gray
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }] 
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    </script>
+}
+
+<style>
+    .fas {
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+    }
+
+    /* ?? Magical Birthday Animations ?? */
+    .birthday-widget {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .birthday-cake-icon {
+        animation: bounce 2s infinite;
+        color: #ff6b6b;
+    }
+
+    .birthday-item {
+        transition: all 0.3s ease;
+        border-radius: 8px !important;
+        margin-bottom: 5px;
+    }
+
+    .birthday-item:hover {
+        background: linear-gradient(45deg, #fff5f5, #ffe6e6);
+        transform: translateX(5px);
+        box-shadow: 0 4px 12px rgba(255, 107, 107, 0.2);
+    }
+
+    .birthday-today {
+        animation: celebration 1.5s infinite;
+        color: #ff4757 !important;
+        font-size: 14px;
+    }
+
+    .birthday-tomorrow {
+        animation: wiggle 2s infinite;
+        color: #ffa502 !important;
+    }
+
+    .birthday-days {
+        animation: pulse 3s infinite;
+        color: #5f27cd !important;
+    }
+
+    .birthday-countdown {
+        font-weight: 600;
+    }
+
+    .birthday-header {
+        background: linear-gradient(135deg, #fff5f5 0%, #ffe6e6 100%);
+        border-bottom: 1px solid #ffcdd2;
+    }
+
+    .birthday-header .card-title {
+        color: #d32f2f;
+    }
+
+    /* ?? Anniversary Animations ?? */
+    .anniversary-widget {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .anniversary-icon {
+        animation: shake 3s infinite;
+        color: #ffd700;
+    }
+
+    .anniversary-item {
+        transition: all 0.3s ease;
+        border-radius: 8px !important;
+        margin-bottom: 5px;
+    }
+
+    .anniversary-item:hover {
+        background: linear-gradient(45deg, #fff9db, #fff3e0);
+        transform: translateY(-3px);
+        box-shadow: 0 4px 12px rgba(255, 193, 7, 0.2);
+    }
+
+    .anniversary-today {
+        animation: celebrate 1.5s infinite;
+        color: #e67e22 !important;
+        font-size: 14px;
+    }
+
+    .anniversary-tomorrow {
+        animation: swing 2s infinite;
+        color: #f39c12 !important;
+    }
+
+    .anniversary-days {
+        animation: heartbeat 3s infinite;
+        color: #8e44ad !important;
+    }
+
+    .anniversary-countdown {
+        font-weight: 600;
+    }
+
+    .anniversary-header {
+        background: linear-gradient(135deg, #fff9db 0%, #fff3e0 100%);
+        border-bottom: 1px solid #ffe0b2;
+    }
+
+    .anniversary-header .card-title {
+        color: #d68910;
+    }
+
+    /* Animation Keyframes */
+    @@keyframes bounce {
+        0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+        40% { transform: translateY(-10px); }
+        60% { transform: translateY(-5px); }
+    }
+
+    @@keyframes celebration {
+        0%, 100% { transform: scale(1) rotate(0deg); }
+        25% { transform: scale(1.1) rotate(-2deg); }
+        50% { transform: scale(1.2) rotate(2deg); }
+        75% { transform: scale(1.1) rotate(-1deg); }
+    }
+
+    @@keyframes wiggle {
+        0%, 7% { transform: rotateZ(0); }
+        15% { transform: rotateZ(-15deg); }
+        20% { transform: rotateZ(10deg); }
+        25% { transform: rotateZ(-10deg); }
+        30% { transform: rotateZ(6deg); }
+        35% { transform: rotateZ(-4deg); }
+        40%, 100% { transform: rotateZ(0); }
+    }
+
+    @@keyframes pulse {
+        0% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.05); opacity: 0.8; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    @@keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        20% { transform: translateX(-5px); }
+        40% { transform: translateX(5px); }
+        60% { transform: translateX(-3px); }
+        80% { transform: translateX(3px); }
+    }
+
+    @@keyframes celebrate {
+        0%, 100% { transform: scale(1) rotate(0deg); }
+        25% { transform: scale(1.1) rotate(-2deg); }
+        50% { transform: scale(1.2) rotate(2deg); }
+        75% { transform: scale(1.1) rotate(-1deg); }
+    }
+
+    @@keyframes swing {
+        0%, 100% { transform: rotate(0deg); }
+        25% { transform: rotate(-15deg); }
+        50% { transform: rotate(10deg); }
+        75% { transform: rotate(-5deg); }
+    }
+
+    @@keyframes heartbeat {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+</style>

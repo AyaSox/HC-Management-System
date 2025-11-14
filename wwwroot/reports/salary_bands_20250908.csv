@@ -1,0 +1,9 @@
+Band,Count
+R0–R250k,5
+R250k–R400k,3
+R400k–R600k,7
+R600k–R900k,9
+R900k–R1.2m,2
+R1.2m–R1.8m,0
+R1.8m–R3m,1
+R3m+,0

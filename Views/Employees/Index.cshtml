@@ -1,0 +1,445 @@
+@model X.PagedList.IPagedList<HRManagementSystem.Models.ViewModels.EmployeeListItem>
+@using X.PagedList.Mvc.Core
+@using HRManagementSystem.Models
+@using Microsoft.AspNetCore.Mvc.Rendering
+
+@{
+    ViewData["Title"] = "Employees";
+    var currentSearchString = ViewBag.CurrentSearch?.ToString() ?? "";
+    var currentDepartmentId = ViewBag.CurrentDepartment?.ToString() ?? "";
+    var currentSortOrder = Context.Request.Query["sortOrder"].ToString();
+    var currentSalaryRange = ViewBag.CurrentSalaryRange?.ToString() ?? "";
+    var currentSalaryMin = ViewBag.CurrentSalaryMin as decimal?;
+    var currentSalaryMax = ViewBag.CurrentSalaryMax as decimal?;
+    var currentStatus = ViewBag.CurrentStatus?.ToString() ?? "";
+}
+
+<h1>Employees</h1>
+
+<div class="mb-3 d-flex justify-content-between">
+    <div>
+        <a asp-action="Create" class="btn btn-primary">Create New</a>
+        <a asp-action="ExportExcel" class="btn btn-success btn-sm">Export All Excel</a>
+        <a asp-action="ExportPdf" class="btn btn-danger btn-sm">Export All PDF</a>
+        <a asp-action="ExportCsv" class="btn btn-warning btn-sm">Export All CSV</a>
+        @if (User.IsInRole("Admin"))
+        {
+            <a asp-action="Import" class="btn btn-info btn-sm"><i class="fas fa-upload"></i> Import CSV</a>
+            <a asp-action="DownloadTemplate" class="btn btn-outline-info btn-sm"><i class="fas fa-download"></i> Download Template</a>
+        }
+    </div>
+    <div>
+        <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#columnModal">
+            <i class="fas fa-columns"></i> Choose Columns
+        </button>
+    </div>
+</div>
+
+<!-- Column Chooser Modal -->
+<div class="modal fade" id="columnModal" tabindex="-1" aria-labelledby="columnModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="columnModalLabel">Choose Columns</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-check">
+                    <input class="form-check-input column-toggle" type="checkbox" value="0" id="col-checkbox" checked>
+                    <label class="form-check-label" for="col-checkbox">Select</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input column-toggle" type="checkbox" value="1" id="col-photo" checked>
+                    <label class="form-check-label" for="col-photo">Photo</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input column-toggle" type="checkbox" value="2" id="col-name" checked>
+                    <label class="form-check-label" for="col-name">Name</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input column-toggle" type="checkbox" value="3" id="col-jobtitle" checked>
+                    <label class="form-check-label" for="col-jobtitle">Job Title</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input column-toggle" type="checkbox" value="4" id="col-emptype" checked>
+                    <label class="form-check-label" for="col-emptype">Employment Type</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input column-toggle" type="checkbox" value="5" id="col-department" checked>
+                    <label class="form-check-label" for="col-department">Department</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input column-toggle" type="checkbox" value="6" id="col-salary" checked>
+                    <label class="form-check-label" for="col-salary">Annual Salary</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input column-toggle" type="checkbox" value="7" id="col-status" checked>
+                    <label class="form-check-label" for="col-status">Status</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input column-toggle" type="checkbox" value="8" id="col-datehired" checked>
+                    <label class="form-check-label" for="col-datehired">Date Hired</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input column-toggle" type="checkbox" value="9" id="col-actions" checked>
+                    <label class="form-check-label" for="col-actions">Actions</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input column-toggle" type="checkbox" value="10" id="col-manager" checked>
+                    <label class="form-check-label" for="col-manager">Line Manager</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="selectAllColumns()">Select All</button>
+                <button type="button" class="btn btn-secondary" onclick="deselectAllColumns()">Deselect All</button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Apply</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Enhanced Search Form -->
+<form asp-action="Index" method="get" class="mb-3" id="filterForm">
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Search & Filter Employees</h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-2 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label">Name/Email</label>
+                    <input name="searchString" class="form-control" placeholder="Search name or email"
+                           value="@currentSearchString" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Department</label>
+                    <select name="departmentId" class="form-select">
+                        <option value="">All Departments</option>
+                        @foreach (var d in (IEnumerable<HRManagementSystem.Models.Department>)ViewBag.Departments)
+                        {
+                            var isSelected = currentDepartmentId == d.DepartmentId.ToString();
+                            <option value="@d.DepartmentId" selected="@isSelected">
+                                @d.Name
+                            </option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Salary Band</label>
+                    <select name="salaryRange" class="form-select" id="salaryRangeSelect" onchange="toggleCustomSalary()">
+                        @foreach (var option in (List<SelectListItem>)ViewBag.SalaryRanges)
+                        {
+                            var isSelected = currentSalaryRange == option.Value;
+                            <option value="@option.Value" selected="@isSelected">@option.Text</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2" id="customMinCol" style="display:none;">
+                    <label class="form-label">Min (R)</label>
+                    <input type="number" name="salaryMin" class="form-control" min="0" step="1000" value="@(currentSalaryMin?.ToString() ?? "")" />
+                </div>
+                <div class="col-md-2" id="customMaxCol" style="display:none;">
+                    <label class="form-label">Max (R)</label>
+                    <input type="number" name="salaryMax" class="form-control" min="0" step="1000" value="@(currentSalaryMax?.ToString() ?? "")" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="">All Status</option>
+                        @foreach (EmployeeStatus status in Enum.GetValues<EmployeeStatus>())
+                        {
+                            var isSelected = currentStatus == status.ToString();
+                            <option value="@status" selected="@isSelected">@status</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-md-12 d-flex gap-2">
+                    <button class="btn btn-primary">Filter</button>
+                    <a asp-action="Index" asp-route-clear="true" class="btn btn-secondary">Clear Filters</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<!-- Bulk Actions Form -->
+<form asp-action="BulkAction" method="post" id="bulkForm">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Employee List</h5>
+            <div class="btn-group">
+                <button type="submit" name="action" value="bulkExport" class="btn btn-info btn-sm">
+                    <i class="fas fa-download"></i> Export Selected
+                </button>
+                <button type="submit" name="action" value="bulkActivate" class="btn btn-success btn-sm">
+                    <i class="fas fa-check"></i> Activate Selected
+                </button>
+                <button type="submit" name="action" value="bulkDeactivate" class="btn btn-warning btn-sm">
+                    <i class="fas fa-pause"></i> Deactivate Selected
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped" id="employeeTable">
+                    <thead>
+                        <tr>
+                            <th data-column="0">
+                                <input type="checkbox" id="selectAll" />
+                            </th>
+                            <th data-column="1">Photo</th>
+                            <th data-column="2">
+                                <a asp-action="Index" asp-route-sortOrder="@ViewBag.NameSort"
+                                   asp-route-searchString="@currentSearchString"
+                                   asp-route-departmentId="@currentDepartmentId"
+                                   asp-route-salaryRange="@currentSalaryRange"
+                                   asp-route-status="@currentStatus">Name</a>
+                            </th>
+                            <th data-column="3">Job Title</th>
+                            <th data-column="4">Employment Type</th>
+                            <th data-column="5">Department</th>
+                            <th data-column="6">
+                                <a asp-action="Index" asp-route-sortOrder="@ViewBag.SalarySort"
+                                   asp-route-searchString="@currentSearchString"
+                                   asp-route-departmentId="@currentDepartmentId"
+                                   asp-route-salaryRange="@currentSalaryRange"
+                                   asp-route-status="@currentStatus">Annual Salary</a>
+                            </th>
+                            <th data-column="7">Status</th>
+                            <th data-column="8">
+                                <a asp-action="Index" asp-route-sortOrder="@ViewBag.DateSort"
+                                   asp-route-searchString="@currentSearchString"
+                                   asp-route-departmentId="@currentDepartmentId"
+                                   asp-route-salaryRange="@currentSalaryRange"
+                                   asp-route-status="@currentStatus">Date Hired</a>
+                            </th>
+                            <th data-column="9">Actions</th>
+                            <th data-column="10">Line Manager</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td data-column="0" class="text-center">
+                                    <input type="checkbox" class="employee-checkbox" name="selectedEmployees" value="@item.EmployeeId" />
+                                </td>
+                                <td data-column="1" class="text-center">
+                                    @if (!string.IsNullOrEmpty(item.ProfilePicturePath))
+                                    {
+                                        <img src="@item.ProfilePicturePath" width="40" height="40" style="object-fit:cover;border-radius:50%" />
+                                    }
+                                    else
+                                    {
+                                        <div class="bg-secondary rounded-circle d-inline-flex align-items-center justify-content-center text-white" style="width:40px;height:40px;font-size:14px;">
+                                            @item.FullName.Substring(0, 1).ToUpper()
+                                        </div>
+                                    }
+                                </td>
+                                <td data-column="2">
+                                    <a asp-action="Details" asp-route-id="@item.EmployeeId" class="text-decoration-none employee-name-link" style="color: black; font-weight: 500;">
+                                        @item.FullName
+                                    </a>
+                                </td>
+                                <td data-column="3">
+                                    @if (!string.IsNullOrEmpty(item.JobTitle))
+                                    {
+                                        @item.JobTitle
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">No title</span>
+                                    }
+                                </td>
+                                <td data-column="4">@item.EmploymentType</td>
+                                <td data-column="5">@item.DepartmentName</td>
+                                <td data-column="6">@item.FormattedSalary</td>
+                                <td data-column="7">
+                                    @switch (item.Status)
+                                    {
+                                        case EmployeeStatus.Active:
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check-circle"></i> Active
+                                            </span>
+                                            break;
+                                        case EmployeeStatus.OnLeave:
+                                            <span class="badge bg-warning">
+                                                <i class="fas fa-clock"></i> On Leave
+                                            </span>
+                                            break;
+                                        case EmployeeStatus.Inactive:
+                                            <span class="badge bg-danger">
+                                                <i class="fas fa-times-circle"></i> Inactive
+                                            </span>
+                                            break;
+                                    }
+                                </td>
+                                <td data-column="8">@item.DateHired.ToShortDateString()</td>
+                                <td data-column="9">
+                                    <div class="btn-group" role="group">
+                                        <a asp-action="Details" asp-route-id="@item.EmployeeId" class="btn btn-sm btn-outline-info" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a asp-action="Edit" asp-route-id="@item.EmployeeId" class="btn btn-sm btn-outline-warning" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        @if (User.IsInRole("Admin"))
+                                        {
+                                            <a asp-action="Delete" asp-route-id="@item.EmployeeId" class="btn btn-sm btn-outline-danger" title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        }
+                                    </div>
+                                </td>
+                                <td data-column="10">
+                                    @if (item.LineManagerId.HasValue && !string.IsNullOrEmpty(item.LineManagerFullName))
+                                    {
+                                        <a asp-action="Details" asp-route-id="@item.LineManagerId.Value" class="text-decoration-none manager-link" title="View manager and their direct reports">
+                                            @item.LineManagerFullName
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">No manager</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</form>
+
+<div class="d-flex justify-content-center">
+    @Html.PagedListPager(Model, page => Url.Action("Index", new {
+        page,
+        sortOrder = currentSortOrder,
+        searchString = currentSearchString,
+        departmentId = currentDepartmentId,
+        salaryRange = currentSalaryRange,
+        status = currentStatus
+    }))
+</div>
+
+<p>
+    Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+    (Showing @Model.Count of @Model.TotalItemCount employees)
+</p>
+
+<script>
+    // Select All functionality
+    document.getElementById('selectAll').addEventListener('change', function() {
+        const checkboxes = document.querySelectorAll('.employee-checkbox');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = this.checked;
+        });
+    });
+
+    // Bulk action confirmation
+    document.getElementById('bulkForm').addEventListener('submit', function(e) {
+        const selectedCheckboxes = document.querySelectorAll('.employee-checkbox:checked');
+        if (selectedCheckboxes.length === 0) {
+            e.preventDefault();
+            alert('Please select at least one employee.');
+            return false;
+        }
+
+        const action = e.submitter.value;
+        if (action === 'bulkDeactivate') {
+            if (!confirm(`Are you sure you want to deactivate ${selectedCheckboxes.length} employees?`)) {
+                e.preventDefault();
+                return false;
+            }
+        }
+    });
+
+    // Column Chooser functionality
+    function selectAllColumns() {
+        document.querySelectorAll('.column-toggle').forEach(cb => cb.checked = true);
+        applyColumnVisibility();
+    }
+
+    function deselectAllColumns() {
+        document.querySelectorAll('.column-toggle').forEach(cb => cb.checked = false);
+        applyColumnVisibility();
+    }
+
+    function applyColumnVisibility() {
+        document.querySelectorAll('.column-toggle').forEach(checkbox => {
+            const columnIndex = checkbox.value;
+            const isVisible = checkbox.checked;
+            const selector = `[data-column="${columnIndex}"]`;
+            
+            document.querySelectorAll(selector).forEach(cell => {
+                cell.style.display = isVisible ? '' : 'none';
+            });
+        });
+    }
+
+    // Apply column toggle event listeners
+    document.querySelectorAll('.column-toggle').forEach(checkbox => {
+        checkbox.addEventListener('change', applyColumnVisibility);
+    });
+
+    // Save column preferences to localStorage
+    document.getElementById('columnModal').addEventListener('hidden.bs.modal', function() {
+        const preferences = {};
+        document.querySelectorAll('.column-toggle').forEach(cb => {
+            preferences[cb.value] = cb.checked;
+        });
+        localStorage.setItem('employeeColumnPrefs', JSON.stringify(preferences));
+    });
+
+    // Load column preferences from localStorage
+    document.addEventListener('DOMContentLoaded', function() {
+        const saved = localStorage.getItem('employeeColumnPrefs');
+        if (saved) {
+            const preferences = JSON.parse(saved);
+            document.querySelectorAll('.column-toggle').forEach(cb => {
+                if (preferences.hasOwnProperty(cb.value)) {
+                    cb.checked = preferences[cb.value];
+                }
+            });
+            applyColumnVisibility();
+        }
+    });
+
+    function toggleCustomSalary() {
+        const sel = document.getElementById('salaryRangeSelect');
+        const show = sel.value === 'custom';
+        document.getElementById('customMinCol').style.display = show ? '' : 'none';
+        document.getElementById('customMaxCol').style.display = show ? '' : 'none';
+    }
+    document.addEventListener('DOMContentLoaded', function(){
+        toggleCustomSalary();
+    });
+</script>
+
+<style>
+    .fas { font-family: "Font Awesome 5 Free"; font-weight: 900; }
+    .employee-name-link:hover { color: #007bff !important; text-decoration: underline !important; }
+    a.manager-link, a.manager-link:link, a.manager-link:visited { color: #000000 !important; font-weight: 500; text-decoration: none; }
+    a.manager-link:hover { color: #007bff !important; text-decoration: underline; }
+    .table th:nth-child(7), .table td:nth-child(7) { min-width: 140px; width: 140px; text-align: left !important; padding-right: 0 !important; }
+    .table td:nth-child(7) { white-space: nowrap; font-weight: 500; }
+    .salary-column { text-align: left !important; padding-right: 0 !important; }
+    .table th:nth-child(7) a { text-align: left !important; display: inline; }
+    .badge { font-size: 0.875em; padding: 0.375rem 0.75rem; }
+    .badge i { margin-right: 0.25rem; }
+    .btn-group .btn { margin: 0 1px; }
+    .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.875rem; }
+    .table th:nth-child(1), .table td:nth-child(1) { width: 40px; }
+    .table th:nth-child(2), .table td:nth-child(2) { width: 60px; }
+    .table th:nth-child(6), .table td:nth-child(6) { width: 120px; }
+    .table th:nth-child(8), .table td:nth-child(8) { width: 100px; }
+    .table th:nth-child(9), .table td:nth-child(9) { width: 100px; }
+    .table th:nth-child(10), .table td:nth-child(10) { width: 120px; }
+    .table th:nth-child(11), .table td:nth-child(11) { width: 130px; }
+    .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .card-body { padding: 1rem; }
+    @@media (max-width: 1200px) { .table-responsive { font-size: 0.875rem; } .table th, .table td { padding: 0.5rem 0.25rem; } }
+</style>

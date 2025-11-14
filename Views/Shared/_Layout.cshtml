@@ -1,0 +1,168 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - HR Management System</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/HRManagementSystem.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-emerald box-shadow mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand fw-semibold" asp-area="" asp-controller="Home" asp-action="Index">
+                    <i class="fas fa-users"></i> HR Management System
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">
+                                <i class="fas fa-home"></i> <span class="d-none d-lg-inline">Home</span>
+                            </a>
+                        </li>
+                        @if (User.Identity!.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Dashboard" asp-action="Index">
+                                    <i class="fas fa-chart-dashboard"></i> <span class="d-none d-lg-inline">Dashboard</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Employees" asp-action="Index">
+                                    <i class="fas fa-user-tie"></i> <span class="d-none d-md-inline">Employees</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Departments" asp-action="Index">
+                                    <i class="fas fa-building"></i> <span class="d-none d-lg-inline">Departments</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="OrgChart" asp-action="Index">
+                                    <i class="fas fa-sitemap"></i> <span class="d-none d-lg-inline">Org Chart</span>
+                                </a>
+                            </li>
+                            @* Leave workflows are handled in ESS. Add link to ESS system. *@
+                            <li class="nav-item">
+                                <a class="nav-link" href="@(Environment.GetEnvironmentVariable("ESS_SYSTEM_URL") ?? "http://localhost:5001")" target="_blank" rel="noopener noreferrer">
+                                    <i class="fas fa-calendar-alt"></i> <span class="d-none d-lg-inline">ESS Leave</span>
+                                </a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="moreDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-ellipsis-h"></i> <span class="d-none d-xl-inline">More</span>
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="moreDropdown">
+                                    <li><a class="dropdown-item" asp-controller="Departments" asp-action="Analytics"><i class="fas fa-chart-bar"></i> Analytics</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><h6 class="dropdown-header"><i class="fas fa-download"></i> Export & Reports</h6></li>
+                                    <li><a class="dropdown-item" href="/Employees/ExportExcel"><i class="fas fa-file-excel text-success"></i> Export to Excel</a></li>
+                                    <li><a class="dropdown-item" href="/Employees/ExportPdf"><i class="fas fa-file-pdf text-danger"></i> Export to PDF</a></li>
+                                    <li><a class="dropdown-item" href="/Employees/ExportCsv"><i class="fas fa-file-csv text-warning"></i> Export to CSV</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><h6 class="dropdown-header"><i class="fas fa-plug"></i> API Integration</h6></li>
+                                    <li><a class="dropdown-item" href="/api/health" target="_blank"><i class="fas fa-heartbeat text-success"></i> Health Check</a></li>
+                                    <li><a class="dropdown-item" href="/api/EmployeesApi" target="_blank"><i class="fas fa-users text-primary"></i> Employees API</a></li>
+                                </ul>
+                            </li>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fas fa-user-shield"></i> <span class="d-none d-xl-inline">Admin</span>
+                                    </a>
+                                    <ul class="dropdown-menu" aria-labelledby="adminDropdown">
+                                        <li><a class="dropdown-item" asp-controller="Audit" asp-action="Index"><i class="fas fa-history"></i> Audit Trail</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Employees" asp-action="Trash"><i class="fas fa-recycle text-success"></i> Recycle Bin</a></li>
+                                        <li><a class="dropdown-item" asp-controller="StatusChange" asp-action="Pending"><i class="fas fa-clipboard-list text-warning"></i> Status Requests</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item" href="/hangfire" target="_blank"><i class="fas fa-tasks text-info"></i> Background Jobs</a></li>
+                                    </ul>
+                                </li>
+                            }
+                        }
+                    </ul>
+                    <div class="d-flex align-items-center gap-2">
+                        <!-- Theme Toggle Button -->
+                        <button id="theme-toggle" class="btn btn-outline-emerald btn-sm" type="button" title="Toggle dark mode">
+                            <i id="theme-icon" class="fas fa-moon"></i>
+                        </button>
+                        
+                        <div class="dropdown">
+                            <button class="btn btn-outline-emerald btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-globe"></i> <span class="d-none d-md-inline">Language</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="/set-culture?culture=en-ZA&returnUrl=@Uri.EscapeDataString(Context.Request.Path + Context.Request.QueryString)"><i class="fas fa-flag"></i> English (ZA) - Rand</a></li>
+                                <li><a class="dropdown-item" href="/set-culture?culture=en-US&returnUrl=@Uri.EscapeDataString(Context.Request.Path + Context.Request.QueryString)"><i class="fas fa-flag"></i> English (US) - Dollar</a></li>
+                            </ul>
+                        </div>
+                        <partial name="_LoginPartial" />
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @* Success and Error Messages *@
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert" aria-live="polite">
+                    <i class="fas fa-check-circle" aria-hidden="true"></i> @TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert" aria-live="assertive">
+                    <i class="fas fa-exclamation-triangle" aria-hidden="true"></i> @TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            
+            @if (TempData["Warning"] != null)
+            {
+                <div class="alert alert-warning alert-dismissible fade show" role="alert" aria-live="polite">
+                    <i class="fas fa-exclamation-circle" aria-hidden="true"></i> @TempData["Warning"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            
+            @if (TempData["Info"] != null)
+            {
+                <div class="alert alert-info alert-dismissible fade show" role="alert" aria-live="polite">
+                    <i class="fas fa-info-circle" aria-hidden="true"></i> @TempData["Info"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    &copy; 2025 - HR Management System
+                </div>
+            </div>
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/confirm-save.js" asp-append-version="true"></script>
+    <script src="~/js/form-enhancements.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

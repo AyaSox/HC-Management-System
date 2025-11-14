@@ -1,0 +1,404 @@
+@model HRManagementSystem.Models.Employee
+
+@{
+    ViewData["Title"] = "Employee Details";
+}
+
+<h1>Employee Details</h1>
+
+<!-- Personal Stats Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card border-primary">
+            <div class="card-body text-center">
+                <i class="fas fa-calendar-alt fa-2x text-primary mb-2"></i>
+                <h5 class="card-title">Tenure</h5>
+                <p class="card-text"><strong>@Model.LengthOfService</strong></p>
+                <small class="text-muted">Since @Model.DateHired.ToString("MMM yyyy")</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-success">
+            <div class="card-body text-center">
+                <i class="fas fa-users fa-2x text-success mb-2"></i>
+                <h5 class="card-title">Team Size</h5>
+                <p class="card-text"><strong>@(Model.DirectReports?.Count ?? 0)</strong></p>
+                <small class="text-muted">Direct Reports</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-warning">
+            <div class="card-body text-center">
+                <i class="fas fa-birthday-cake fa-2x text-warning mb-2"></i>
+                <h5 class="card-title">Birthday</h5>
+                <p class="card-text">
+                    @if (Model.DateOfBirth.HasValue)
+                    {
+                        var nextBirthday = new DateTime(DateTime.Now.Year, Model.DateOfBirth.Value.Month, Model.DateOfBirth.Value.Day);
+                        if (nextBirthday < DateTime.Now)
+                            nextBirthday = nextBirthday.AddYears(1);
+                        var daysUntil = (nextBirthday - DateTime.Now).Days;
+                        <strong>@(daysUntil == 0 ? "Today!" : daysUntil + " days")</strong>
+                    }
+                    else
+                    {
+                        <strong>N/A</strong>
+                    }
+                </p>
+                <small class="text-muted">
+                    @if (Model.DateOfBirth.HasValue)
+                    {
+                        @Model.DateOfBirth.Value.ToString("MMM dd")
+                    }
+                    else
+                    {
+                        @:Not provided
+                    }
+                </small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-info">
+            <div class="card-body text-center">
+                <i class="fas fa-medal fa-2x text-info mb-2"></i>
+                <h5 class="card-title">Anniversary</h5>
+                <p class="card-text">
+                    @{
+                        var nextAnniversary = new DateTime(DateTime.Now.Year, Model.DateHired.Month, Model.DateHired.Day);
+                        if (nextAnniversary < DateTime.Now)
+                            nextAnniversary = nextAnniversary.AddYears(1);
+                        var daysUntilAnniversary = (nextAnniversary - DateTime.Now).Days;
+                    }
+                    <strong>@(daysUntilAnniversary == 0 ? "Today!" : daysUntilAnniversary + " days")</strong>
+                </p>
+                <small class="text-muted">@Model.DateHired.ToString("MMM dd")</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Department Stats -->
+@if (ViewBag.DepartmentStats != null)
+{
+    var stats = ViewBag.DepartmentStats as dynamic;
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-secondary">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-building"></i> Department Stats - @Model.Department?.Name</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <h6>Total Employees</h6>
+                            <span class="badge bg-primary fs-6">@stats.TotalEmployees</span>
+                        </div>
+                        <div class="col-md-3">
+                            <h6>Average Salary</h6>
+                            <span class="badge bg-success fs-6">@stats.AverageSalary</span>
+                        </div>
+                        <div class="col-md-3">
+                            <h6>Your Rank</h6>
+                            <span class="badge bg-info fs-6">#@stats.SalaryRank</span>
+                        </div>
+                        <div class="col-md-3">
+                            <h6>Avg Tenure</h6>
+                            <span class="badge bg-warning fs-6">@stats.AverageTenure years</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="card">
+    <div class="card-header">
+        <h4><i class="fas fa-user"></i> @Model.FullName</h4>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-8">
+                <dl class="row">
+                    <dt class="col-sm-4">
+                        @Html.DisplayNameFor(model => model.EmployeeNumber)
+                    </dt>
+                    <dd class="col-sm-8">
+                        @if (!string.IsNullOrEmpty(Model.EmployeeNumber))
+                        {
+                            <span class="badge bg-secondary">@Model.EmployeeNumber</span>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Not assigned</span>
+                        }
+                    </dd>
+
+                    <dt class="col-sm-4">
+                        @Html.DisplayNameFor(model => model.FullName)
+                    </dt>
+                    <dd class="col-sm-8">
+                        @Html.DisplayFor(model => model.FullName)
+                    </dd>
+
+                    <dt class="col-sm-4">
+                        @Html.DisplayNameFor(model => model.JobTitle)
+                    </dt>
+                    <dd class="col-sm-8">
+                        @if (!string.IsNullOrEmpty(Model.JobTitle))
+                        {
+                            @Model.JobTitle
+                        }
+                        else
+                        {
+                            <span class="text-muted">No job title specified</span>
+                        }
+                    </dd>
+
+                    <dt class="col-sm-4">
+                        @Html.DisplayNameFor(model => model.EmploymentType)
+                    </dt>
+                    <dd class="col-sm-8">
+                        @Model.EmploymentType.ToString()
+                    </dd>
+
+                    <dt class="col-sm-4">
+                        @Html.DisplayNameFor(model => model.Email)
+                    </dt>
+                    <dd class="col-sm-8">
+                        <a href="mailto:@Model.Email">@Html.DisplayFor(model => model.Email)</a>
+                    </dd>
+
+                    <dt class="col-sm-4">
+                        @Html.DisplayNameFor(model => model.Department)
+                    </dt>
+                    <dd class="col-sm-8">
+                        @Html.DisplayFor(model => model.Department.Name)
+                    </dd>
+
+                    @if (Model.LineManager != null)
+                    {
+                        <dt class="col-sm-4">
+                            @Html.DisplayNameFor(model => model.LineManager)
+                        </dt>
+                        <dd class="col-sm-8">
+                            <div class="card border-info">
+                                <div class="card-body py-2">
+                                    <div class="d-flex align-items-center">
+                                        @if (!string.IsNullOrEmpty(Model.LineManager.ProfilePicturePath))
+                                        {
+                                            <img src="@Model.LineManager.ProfilePicturePath" width="40" height="40" style="object-fit:cover;border-radius:50%" class="me-2" />
+                                        }
+                                        else
+                                        {
+                                            <div class="bg-secondary rounded-circle d-inline-flex align-items-center justify-content-center text-white me-2" style="width:40px;height:40px;font-size:14px;">
+                                                @Model.LineManager.FullName.Substring(0, 1).ToUpper()
+                                            </div>
+                                        }
+                                        <div>
+                                            <a asp-action="Details" asp-route-id="@Model.LineManager.EmployeeId" class="text-decoration-none fw-bold">
+                                                @Model.LineManager.FullName
+                                            </a>
+                                            @if (!string.IsNullOrEmpty(Model.LineManager.JobTitle))
+                                            {
+                                                <br><small class="text-muted">@Model.LineManager.JobTitle</small>
+                                            }
+                                            @if (Model.LineManager.Department != null)
+                                            {
+                                                <br><small class="text-info">@Model.LineManager.Department.Name</small>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </dd>
+                    }
+                    else
+                    {
+                        <dt class="col-sm-4">
+                            @Html.DisplayNameFor(model => model.LineManager)
+                        </dt>
+                        <dd class="col-sm-8">
+                            <span class="text-muted">No line manager assigned</span>
+                        </dd>
+                    }
+
+                    <dt class="col-sm-4">
+                        @Html.DisplayNameFor(model => model.Status)
+                    </dt>
+                    <dd class="col-sm-8">
+                        @switch (Model.Status)
+                        {
+                            case HRManagementSystem.Models.EmployeeStatus.Active:
+                                <span class="badge bg-success"><i class="fas fa-check-circle"></i> Active</span>
+                                break;
+                            case HRManagementSystem.Models.EmployeeStatus.OnLeave:
+                                <span class="badge bg-warning"><i class="fas fa-clock"></i> On Leave</span>
+                                break;
+                            case HRManagementSystem.Models.EmployeeStatus.Inactive:
+                                <span class="badge bg-danger"><i class="fas fa-times-circle"></i> Inactive</span>
+                                break;
+                        }
+                        @if (User.Identity!.IsAuthenticated)
+                        {
+                            <a asp-controller="StatusChange" asp-action="Request" asp-route-id="@Model.EmployeeId" 
+                               class="btn btn-sm btn-outline-primary ms-2" title="Request Status Change">
+                                <i class="fas fa-exchange-alt"></i> Change Status
+                            </a>
+                        }
+                        
+                        @* Show pending status change if exists *@
+                        @if (ViewBag.HasPendingStatusChange == true)
+                        {
+                            <br><small class="text-warning mt-1">
+                                <i class="fas fa-clock"></i> Status change request pending approval
+                            </small>
+                        }
+                    </dd>
+
+                    <dt class="col-sm-4">
+                        @Html.DisplayNameFor(model => model.DateHired)
+                    </dt>
+                    <dd class="col-sm-8">
+                        @Model.DateHired.ToShortDateString()
+                        @if (Model.DateHired >= DateTime.Now.AddDays(-30))
+                        {
+                            <span class="badge bg-primary ms-2">Recent Hire</span>
+                        }
+                        @if (Model.HasUpcomingAnniversary)
+                        {
+                            <i class="fas fa-medal text-warning ms-2" title="Anniversary coming up!"></i>
+                        }
+                        <br><small class="text-info"><strong>Length of Service:</strong> @Model.LengthOfService</small>
+                    </dd>
+
+                    @if (Model.DateOfBirth.HasValue)
+                    {
+                        <dt class="col-sm-4">
+                            @Html.DisplayNameFor(model => model.DateOfBirth)
+                        </dt>
+                        <dd class="col-sm-8">
+                            @Model.DateOfBirth.Value.ToShortDateString()
+                            @if (Model.Age.HasValue)
+                            {
+                                <small class="text-muted">(Age: @Model.Age)</small>
+                            }
+                            @if (Model.HasUpcomingBirthday)
+                            {
+                                <i class="fas fa-birthday-cake text-warning ms-2" title="Birthday coming up!"></i>
+                            }
+                        </dd>
+                    }
+
+                    <dt class="col-sm-4">
+                        @Html.DisplayNameFor(model => model.Salary)
+                    </dt>
+                    <dd class="col-sm-8">
+                        <strong>@Model.FormattedSalary</strong>
+                    </dd>
+
+                    @if (!string.IsNullOrEmpty(Model.Gender))
+                    {
+                        <dt class="col-sm-4">
+                            @Html.DisplayNameFor(model => model.Gender)
+                        </dt>
+                        <dd class="col-sm-8">
+                            @Html.DisplayFor(model => model.Gender)
+                        </dd>
+                    }
+                </dl>
+
+                @if (!string.IsNullOrEmpty(Model.EmergencyContactName) || !string.IsNullOrEmpty(Model.EmergencyContactPhone))
+                {
+                    <hr>
+                    <h5><i class="fas fa-phone-alt"></i> Emergency Contact</h5>
+                    <dl class="row">
+                        @if (!string.IsNullOrEmpty(Model.EmergencyContactName))
+                        {
+                            <dt class="col-sm-4">
+                                @Html.DisplayNameFor(model => model.EmergencyContactName)
+                            </dt>
+                            <dd class="col-sm-8">
+                                @Html.DisplayFor(model => model.EmergencyContactName)
+                            </dd>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.EmergencyContactPhone))
+                        {
+                            <dt class="col-sm-4">
+                                @Html.DisplayNameFor(model => model.EmergencyContactPhone)
+                            </dt>
+                            <dd class="col-sm-8">
+                                <a href="tel:@Model.EmergencyContactPhone">@Html.DisplayFor(model => model.EmergencyContactPhone)</a>
+                            </dd>
+                        }
+                    </dl>
+                }
+
+                @if (Model.DirectReports != null && Model.DirectReports.Any())
+                {
+                    <hr>
+                    <h5><i class="fas fa-users"></i> Direct Reports (@Model.DirectReports.Count)</h5>
+                    <div class="row">
+                        @foreach (var report in Model.DirectReports)
+                        {
+                            <div class="col-md-6 mb-2">
+                                <div class="card border-light">
+                                    <div class="card-body py-2">
+                                        <a asp-action="Details" asp-route-id="@report.EmployeeId" class="text-decoration-none">
+                                            <i class="fas fa-user"></i> @report.FullName
+                                        </a>
+                                        @if (!string.IsNullOrEmpty(report.JobTitle))
+                                        {
+                                            <br><small class="text-muted">@report.JobTitle</small>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+            <div class="col-md-4">
+                @if (!string.IsNullOrEmpty(Model.ProfilePicturePath))
+                {
+                    <div class="text-center">
+                        <img src="@Model.ProfilePicturePath" class="img-fluid rounded shadow" style="max-width: 200px;" alt="Profile Picture" />
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center">
+                        <div class="bg-secondary rounded d-flex align-items-center justify-content-center shadow" style="width:200px;height:200px;color:white;font-size:4rem;margin:0 auto;">
+                            @Model.FullName.Substring(0, 1).ToUpper()
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-3">
+    <a asp-action="Edit" asp-route-id="@Model?.EmployeeId" class="btn btn-warning">
+        <i class="fas fa-edit"></i> Edit
+    </a>
+    <a asp-action="Index" class="btn btn-secondary">
+        <i class="fas fa-list"></i> Back to List
+    </a>
+    @if (User.IsInRole("Admin"))
+    {
+        <a asp-action="Delete" asp-route-id="@Model?.EmployeeId" class="btn btn-danger">
+            <i class="fas fa-trash"></i> Delete
+        </a>
+    }
+</div>
+
+<style>
+    .fas {
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+    }
+</style>

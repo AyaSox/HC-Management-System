@@ -1,0 +1,290 @@
+@{
+    ViewData["Title"] = "Login";
+}
+
+<div class="login-container">
+    <div class="row g-0 min-vh-80">
+        <!-- Left Side - Hero Section -->
+        <div class="col-lg-6 d-none d-lg-flex login-hero">
+            <div class="hero-content-wrapper">
+                <div class="text-white p-5">
+                    <div class="mb-4">
+                        <i class="fas fa-users-cog fa-4x mb-3"></i>
+                        <h1 class="display-4 fw-bold">Welcome Back!</h1>
+                        <p class="lead">Manage your workforce efficiently with our comprehensive HR Management System</p>
+                    </div>
+                    
+                    <div class="features-list mt-5">
+                        <div class="feature-item mb-4">
+                            <i class="fas fa-check-circle fa-2x me-3"></i>
+                            <div>
+                                <h5 class="mb-1">Employee Management</h5>
+                                <p class="mb-0 opacity-75">Complete records, profiles, and tracking</p>
+                            </div>
+                        </div>
+                        <div class="feature-item mb-4">
+                            <i class="fas fa-check-circle fa-2x me-3"></i>
+                            <div>
+                                <h5 class="mb-1">Department Analytics</h5>
+                                <p class="mb-0 opacity-75">Real-time insights and reporting</p>
+                            </div>
+                        </div>
+                        <div class="feature-item mb-4">
+                            <i class="fas fa-check-circle fa-2x me-3"></i>
+                            <div>
+                                <h5 class="mb-1">Secure & Reliable</h5>
+                                <p class="mb-0 opacity-75">Role-based access and audit trails</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side - Login Form -->
+        <div class="col-lg-6 d-flex align-items-center justify-content-center bg-light">
+            <div class="login-form-wrapper w-100 p-5">
+                <div class="text-center mb-4 d-lg-none">
+                    <i class="fas fa-users text-primary fa-3x mb-3"></i>
+                    <h2 class="fw-bold">HR Management System</h2>
+                </div>
+                
+                <div class="login-card">
+                    <h2 class="fw-bold mb-4">Login</h2>
+                    <p class="text-muted mb-4">Enter your credentials to access your account</p>
+
+                    <form asp-action="Login" method="post">
+                        <div asp-validation-summary="All" class="alert alert-danger" role="alert"></div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="email" class="form-label fw-semibold">
+                                <i class="fas fa-envelope me-2"></i>Email Address
+                            </label>
+                            <input type="email" name="email" id="email" class="form-control form-control-lg" placeholder="your@email.com" required />
+                        </div>
+                        
+                        <div class="form-group mb-4">
+                            <label for="password" class="form-label fw-semibold">
+                                <i class="fas fa-lock me-2"></i>Password
+                            </label>
+                            <input type="password" name="password" id="password" class="form-control form-control-lg" placeholder="Enter your password" required />
+                        </div>
+                        
+                        <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+                        
+                        <div class="d-grid mb-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-sign-in-alt me-2"></i>Login
+                            </button>
+                        </div>
+
+                        <div class="text-center">
+                            <p class="mb-0">
+                                Don't have an account? 
+                                <a asp-action="Register" class="text-primary fw-semibold text-decoration-none">
+                                    Register here
+                                </a>
+                            </p>
+                        </div>
+                    </form>
+
+                    <!-- Demo Credentials Card -->
+                    <div class="demo-card mt-4 p-3 bg-info bg-opacity-10 rounded">
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-info-circle text-info me-3 mt-1"></i>
+                            <div>
+                                <h6 class="fw-bold mb-2 text-info">Demo Account</h6>
+                                <div class="demo-credentials">
+                                    <p class="mb-1 small">
+                                        <strong>Email:</strong> 
+                                        <code class="bg-white px-2 py-1 rounded">admin@hrsystem.com</code>
+                                    </p>
+                                    <p class="mb-0 small">
+                                        <strong>Password:</strong> 
+                                        <code class="bg-white px-2 py-1 rounded">Admin@123</code>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .login-container {
+        /* remove negative margins to prevent navbar/footer overlap */
+        margin: 0;
+        padding: 2rem 0; /* breathing space below navbar and above footer */
+        min-height: calc(100vh - 140px);
+    }
+    
+    .min-vh-80 {
+        min-height: 80vh;
+    }
+    
+    /* Hero Section */
+    .login-hero {
+        background: linear-gradient(135deg, #047857 0%, #059669 60%, #10b981 100%);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .login-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: 
+            radial-gradient(circle at 30% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 70% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+        animation: gradient-shift 15s ease infinite;
+    }
+    
+    @@keyframes gradient-shift {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.8; }
+    }
+    
+    .hero-content-wrapper {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        width: 100%;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    .feature-item {
+        display: flex;
+        align-items: start;
+        animation: fadeInLeft 1s ease-out;
+    }
+    
+    .feature-item i {
+        flex-shrink: 0;
+    }
+    
+    @@keyframes fadeInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
+    /* Login Form */
+    .login-form-wrapper {
+        max-width: 500px;
+        margin: 0 auto;
+    }
+    
+    .login-card {
+        animation: fadeIn 0.8s ease-out;
+    }
+    
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .form-control-lg {
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control-lg:focus {
+        border-color: #10b981;
+        box-shadow: 0 0 0 0.2rem rgba(16, 185, 129, 0.2);
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+        border: none;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        border-radius: 0.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(5, 150, 105, 0.35);
+    }
+    
+    .demo-card {
+        border: 2px solid rgba(13, 202, 240, 0.2);
+    }
+    
+    .demo-card code {
+        font-size: 0.85rem;
+    }
+    /* Remove pink/red fill and surrounding line on validation summary */
+    .login-card .alert-danger {
+        background-color: transparent !important;
+        border: none !important;
+        color: #dc3545 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    /* Hide the block completely when there are no errors */
+    .login-card .alert-danger:empty { display: none !important; }
+    
+    /* Responsive adjustments */
+    @@media (max-width: 991.98px) {
+        .login-container {
+            margin: 0;
+        }
+        
+        .login-form-wrapper {
+            padding: 2rem 1.5rem !important;
+        }
+    }
+    
+    /* Dark theme support */
+    [data-theme="dark"] .login-hero {
+        background: linear-gradient(135deg, #064e3b 0%, #065f46 60%, #047857 100%);
+    }
+    
+    [data-theme="dark"] .bg-light {
+        background-color: #2d2d2d !important;
+    }
+    
+    [data-theme="dark"] .form-control-lg {
+        background-color: #1a1a1a;
+        border-color: #404040;
+        color: #e0e0e0;
+    }
+    
+    [data-theme="dark"] .form-control-lg:focus {
+        background-color: #252525;
+        border-color: #059669;
+        color: #e0e0e0;
+    }
+    
+    [data-theme="dark"] .demo-card {
+        background-color: rgba(13, 202, 240, 0.1) !important;
+        border-color: rgba(13, 202, 240, 0.3);
+    }
+    
+    [data-theme="dark"] .demo-card code {
+        background-color: #1a1a1a !important;
+        color: #e0e0e0 !important;
+    }
+</style>

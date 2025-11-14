@@ -1,0 +1,394 @@
+@{
+    ViewData["Title"] = "System Status & Monitoring";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-heartbeat"></i> System Status & Monitoring</h2>
+    <div class="d-flex gap-2">
+        <button type="button" class="btn btn-primary" onclick="refreshStatus()">
+            <i class="fas fa-sync-alt" id="refreshIcon"></i> Refresh Status
+        </button>
+        <a href="http://localhost:5100/health" target="_blank" class="btn btn-outline-info">
+            <i class="fas fa-external-link-alt"></i> API Health
+        </a>
+    </div>
+</div>
+
+<!-- System Overview -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="mb-0" id="apiStatus">Online</h4>
+                        <p class="mb-0">ESS API</p>
+                    </div>
+                    <div>
+                        <i class="fas fa-server fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="mb-0" id="dbStatus">Connected</h4>
+                        <p class="mb-0">Database</p>
+                    </div>
+                    <div>
+                        <i class="fas fa-database fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="mb-0" id="cacheStatus">Active</h4>
+                        <p class="mb-0">Cache</p>
+                    </div>
+                    <div>
+                        <i class="fas fa-memory fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-secondary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="mb-0" id="responseTime">--ms</h4>
+                        <p class="mb-0">Response Time</p>
+                    </div>
+                    <div>
+                        <i class="fas fa-tachometer-alt fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Health Checks -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-stethoscope"></i> Detailed Health Checks</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover" id="healthTable">
+                <thead>
+                    <tr>
+                        <th>Component</th>
+                        <th>Status</th>
+                        <th>Response Time</th>
+                        <th>Last Checked</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><i class="fas fa-database"></i> Database</td>
+                        <td><span class="badge bg-success" id="dbStatusBadge">Healthy</span></td>
+                        <td id="dbResponseTime">--</td>
+                        <td id="dbLastChecked">--</td>
+                        <td id="dbDetails">--</td>
+                    </tr>
+                    <tr>
+                        <td><i class="fas fa-folder"></i> File System</td>
+                        <td><span class="badge bg-success" id="fsStatusBadge">Healthy</span></td>
+                        <td id="fsResponseTime">--</td>
+                        <td id="fsLastChecked">--</td>
+                        <td id="fsDetails">--</td>
+                    </tr>
+                    <tr>
+                        <td><i class="fas fa-external-link-alt"></i> HR System API</td>
+                        <td><span class="badge bg-warning" id="hrStatusBadge">Checking...</span></td>
+                        <td id="hrResponseTime">--</td>
+                        <td id="hrLastChecked">--</td>
+                        <td id="hrDetails">--</td>
+                    </tr>
+                    <tr>
+                        <td><i class="fas fa-table"></i> DbContext</td>
+                        <td><span class="badge bg-success" id="ctxStatusBadge">Healthy</span></td>
+                        <td id="ctxResponseTime">--</td>
+                        <td id="ctxLastChecked">--</td>
+                        <td id="ctxDetails">--</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Performance Metrics -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-chart-line"></i> API Performance (Last 24h)</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="performanceChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-exclamation-triangle"></i> Recent Errors</h6>
+            </div>
+            <div class="card-body">
+                <div id="recentErrors" class="list-group list-group-flush">
+                    <div class="list-group-item">
+                        <small class="text-muted">No recent errors detected</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- System Information -->
+<div class="card">
+    <div class="card-header">
+        <h6 class="mb-0"><i class="fas fa-info-circle"></i> System Information</h6>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4">
+                <h6>ESS Leave API</h6>
+                <ul class="list-unstyled">
+                    <li><strong>Version:</strong> <span id="apiVersion">v1.0</span></li>
+                    <li><strong>Environment:</strong> <span id="environment">Development</span></li>
+                    <li><strong>Uptime:</strong> <span id="uptime">--</span></li>
+                    <li><strong>URL:</strong> <a href="http://localhost:5100" target="_blank">http://localhost:5100</a></li>
+                </ul>
+            </div>
+            <div class="col-md-4">
+                <h6>Features Enabled</h6>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success"></i> JWT Authentication</li>
+                    <li><i class="fas fa-check text-success"></i> File Upload</li>
+                    <li><i class="fas fa-check text-success"></i> Memory Caching</li>
+                    <li><i class="fas fa-check text-success"></i> Health Monitoring</li>
+                    <li><i class="fas fa-check text-success"></i> Structured Logging</li>
+                </ul>
+            </div>
+            <div class="col-md-4">
+                <h6>Integration Status</h6>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-link text-success"></i> HR System Connected</li>
+                    <li><i class="fas fa-database text-success"></i> Database: SQLite</li>
+                    <li><i class="fas fa-shield-alt text-success"></i> CORS Configured</li>
+                    <li><i class="fas fa-file-alt text-success"></i> Swagger API Docs</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let healthCheckInterval;
+
+async function refreshStatus() {
+    const refreshIcon = document.getElementById('refreshIcon');
+    refreshIcon.classList.add('fa-spin');
+    
+    try {
+        await checkApiHealth();
+        await checkSystemMetrics();
+    } catch (error) {
+        console.error('Error refreshing status:', error);
+        showError('Failed to refresh system status');
+    } finally {
+        refreshIcon.classList.remove('fa-spin');
+    }
+}
+
+async function checkApiHealth() {
+    try {
+        const response = await fetch('http://localhost:5100/health');
+        const data = await response.json();
+        
+        updateHealthStatus(data);
+        updateApiStatus('Online', 'success');
+        
+    } catch (error) {
+        updateApiStatus('Offline', 'danger');
+        console.error('API health check failed:', error);
+    }
+}
+
+function updateHealthStatus(healthData) {
+    const checks = healthData.checks || [];
+    
+    checks.forEach(check => {
+        const statusClass = getStatusClass(check.status);
+        const checkName = check.name.toLowerCase();
+        
+        // Update status badges
+        const statusBadge = document.getElementById(`${getHealthId(checkName)}StatusBadge`);
+        if (statusBadge) {
+            statusBadge.className = `badge bg-${statusClass}`;
+            statusBadge.textContent = check.status;
+        }
+        
+        // Update response times
+        const responseTime = document.getElementById(`${getHealthId(checkName)}ResponseTime`);
+        if (responseTime) {
+            responseTime.textContent = check.duration || '--';
+        }
+        
+        // Update last checked
+        const lastChecked = document.getElementById(`${getHealthId(checkName)}LastChecked`);
+        if (lastChecked) {
+            lastChecked.textContent = new Date().toLocaleTimeString();
+        }
+        
+        // Update details
+        const details = document.getElementById(`${getHealthId(checkName)}Details`);
+        if (details && check.data) {
+            const dataString = Object.keys(check.data).map(key => 
+                `${key}: ${check.data[key]}`).join(', ');
+            details.textContent = dataString.length > 50 ? 
+                dataString.substring(0, 50) + '...' : dataString;
+        }
+    });
+    
+    // Update overall response time
+    document.getElementById('responseTime').textContent = healthData.totalDuration || '--';
+}
+
+function getHealthId(checkName) {
+    const mapping = {
+        'database': 'db',
+        'filesystem': 'fs',
+        'external_api': 'hr',
+        'dbcontext': 'ctx'
+    };
+    return mapping[checkName] || checkName.substring(0, 2);
+}
+
+function getStatusClass(status) {
+    switch (status.toLowerCase()) {
+        case 'healthy': return 'success';
+        case 'degraded': return 'warning';
+        case 'unhealthy': return 'danger';
+        default: return 'secondary';
+    }
+}
+
+function updateApiStatus(status, type) {
+    const apiStatus = document.getElementById('apiStatus');
+    const card = apiStatus.closest('.card');
+    
+    apiStatus.textContent = status;
+    
+    // Update card color
+    card.className = card.className.replace(/bg-\w+/, `bg-${type}`);
+}
+
+async function checkSystemMetrics() {
+    // Simulate system metrics - in real implementation, 
+    // this would call actual monitoring endpoints
+    
+    const metrics = {
+        uptime: '2h 15m',
+        environment: 'Development',
+        apiVersion: 'v1.0.0'
+    };
+    
+    document.getElementById('uptime').textContent = metrics.uptime;
+    document.getElementById('environment').textContent = metrics.environment;
+    document.getElementById('apiVersion').textContent = metrics.apiVersion;
+}
+
+function showError(message) {
+    // Simple error notification
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'alert alert-danger alert-dismissible fade show position-fixed';
+    alertDiv.style.top = '20px';
+    alertDiv.style.right = '20px';
+    alertDiv.style.zIndex = '9999';
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.body.appendChild(alertDiv);
+    
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 5000);
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    refreshStatus();
+    
+    // Set up auto-refresh every 30 seconds
+    healthCheckInterval = setInterval(refreshStatus, 30000);
+});
+
+// Cleanup interval when page is unloaded
+window.addEventListener('beforeunload', function() {
+    if (healthCheckInterval) {
+        clearInterval(healthCheckInterval);
+    }
+});
+</script>
+
+<style>
+    .fas {
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+    }
+
+    .fa-spin {
+        -webkit-animation: fa-spin 1s infinite linear;
+        animation: fa-spin 1s infinite linear;
+    }
+
+    @@-webkit-keyframes fa-spin {
+        0% {
+            -webkit-transform: rotate(0deg);
+            transform: rotate(0deg);
+        }
+        100% {
+            -webkit-transform: rotate(360deg);
+            transform: rotate(360deg);
+        }
+    }
+
+    @@keyframes fa-spin {
+        0% {
+            -webkit-transform: rotate(0deg);
+            transform: rotate(0deg);
+        }
+        100% {
+            -webkit-transform: rotate(360deg);
+            transform: rotate(360deg);
+        }
+    }
+
+    .card {
+        transition: transform 0.2s;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+    }
+
+    .position-fixed {
+        position: fixed !important;
+    }
+</style>

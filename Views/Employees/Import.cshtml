@@ -1,0 +1,141 @@
+@model IEnumerable<HRManagementSystem.Models.ViewModels.EmployeeImportRow>
+@{
+    ViewData["Title"] = "Import Employees";
+    var rows = ViewBag.Rows as List<HRManagementSystem.Models.ViewModels.EmployeeImportRow> ?? new();
+}
+
+<h2><i class="fas fa-upload"></i> Import Employees (CSV)</h2>
+
+<div class="alert alert-info">
+    <i class="fas fa-info-circle"></i>
+    <strong>Import Instructions:</strong>
+    <ul class="mb-0">
+        <li>Use the template with all required fields to avoid empty data</li>
+        <li>Download the template for proper column format</li>
+        <li>All employee fields should be completed for best results</li>
+        <li>Employment Types: Permanent, Contract, Temporary, Intern, Graduate, Consultant</li>
+        <li>Status Values: Active, OnLeave, Inactive</li>
+    </ul>
+</div>
+
+<div class="card mb-3">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="fas fa-file-upload"></i> Upload CSV File</span>
+        <a asp-action="DownloadTemplate" class="btn btn-outline-primary btn-sm">
+            <i class="fas fa-download"></i> Download Template
+        </a>
+    </div>
+    <div class="card-body">
+        <form asp-action="ImportPreview" method="post" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label class="form-label" for="csvFile">CSV File</label>
+                <input type="file" class="form-control" name="csvFile" id="csvFile" accept=".csv" aria-label="Upload CSV file" />
+                <small class="text-muted">
+                    <strong>Required Columns:</strong> EmployeeNumber, FullName, Email, JobTitle, EmploymentType, Department, DateHired, DateOfBirth, Salary, Gender, Status, EmergencyContactName, EmergencyContactPhone, LineManager
+                </small>
+            </div>
+            <button class="btn btn-primary" type="submit">
+                <i class="fas fa-eye"></i> Upload & Preview
+            </button>
+        </form>
+    </div>
+</div>
+
+@if (rows.Any())
+{
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="fas fa-table"></i> Import Preview (@rows.Count records)</span>
+            <div>
+                @{
+                    var validRows = rows.Where(r => !r.Errors.Any()).Count();
+                    var errorRows = rows.Count - validRows;
+                }
+                <span class="badge bg-success">@validRows Valid</span>
+                @if (errorRows > 0)
+                {
+                    <span class="badge bg-danger">@errorRows Errors</span>
+                }
+                @if (validRows > 0)
+                {
+                    <form asp-action="ImportConfirm" method="post" class="d-inline">
+                        <button class="btn btn-success btn-sm ms-2" type="submit">
+                            <i class="fas fa-check"></i> Confirm Import (@validRows records)
+                        </button>
+                    </form>
+                }
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-sm table-striped">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Employee #</th>
+                            <th>Full Name</th>
+                            <th>Email</th>
+                            <th>Job Title</th>
+                            <th>Employment Type</th>
+                            <th>Department</th>
+                            <th>Date Hired</th>
+                            <th>Date of Birth</th>
+                            <th>Salary</th>
+                            <th>Gender</th>
+                            <th>Status</th>
+                            <th>Emergency Contact</th>
+                            <th>Emergency Phone</th>
+                            <th>Line Manager</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var r in rows)
+                        {
+                            <tr class="@(r.Errors.Any() ? "table-danger" : "table-success")">
+                                <td>@r.EmployeeNumber</td>
+                                <td>@r.FullName</td>
+                                <td>@r.Email</td>
+                                <td>@r.JobTitle</td>
+                                <td>@r.EmploymentType</td>
+                                <td>@r.DepartmentName</td>
+                                <td>@r.DateHiredText</td>
+                                <td>@r.DateOfBirthText</td>
+                                <td>@r.SalaryText</td>
+                                <td>@r.Gender</td>
+                                <td>@r.Status</td>
+                                <td>@r.EmergencyContactName</td>
+                                <td>@r.EmergencyContactPhone</td>
+                                <td>@r.LineManagerName</td>
+                                <td>
+                                    @if (r.Errors.Any())
+                                    {
+                                        <ul class="mb-0 text-danger small">
+                                            @foreach (var e in r.Errors)
+                                            {
+                                                <li>@e</li>
+                                            }
+                                        </ul>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-success"><i class="fas fa-check"></i> Valid</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="mt-3">
+    <a asp-action="Index" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Employee List
+    </a>
+</div>
+
+<style>
+    .fas { font-family: "Font Awesome 5 Free"; font-weight: 900; }
+</style>

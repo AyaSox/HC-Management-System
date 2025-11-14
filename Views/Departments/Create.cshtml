@@ -1,0 +1,57 @@
+@model HRManagementSystem.Models.Department
+
+@{
+    ViewData["Title"] = "Create Department";
+}
+
+<h1>Create Department</h1>
+
+<h4>Department</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create" id="departmentCreateForm">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" id="confirmDeptCreateFlag" value="false" />
+            <div class="form-group mb-3">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@await Html.PartialAsync("~/Views/Shared/_ConfirmSaveModal.cshtml")
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('departmentCreateForm');
+            const confirmFlag = document.getElementById('confirmDeptCreateFlag');
+
+            form.addEventListener('submit', function(e) {
+                if (!form.checkValidity()) { return; }
+                if (confirmFlag.value === 'true') { return; }
+                e.preventDefault();
+
+                const items = [
+                    ['Department Name', document.querySelector('input[name="Name"]').value]
+                ];
+
+                hrConfirm.showCreate(items, () => {
+                    confirmFlag.value = 'true';
+                    form.submit();
+                }, 'Creating...');
+            });
+        });
+    </script>
+}

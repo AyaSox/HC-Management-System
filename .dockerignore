@@ -1,0 +1,54 @@
+# VCS and IDE
+.git/
+.github/
+.gitattributes
+.gitignore
+.vs/
+.vscode/
+.idea/
+
+# Build outputs
+bin/
+obj/
+out/
+
+# User-specific files
+**/*.user
+**/*.suo
+**/*.csproj.user
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Tests / coverage
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+
+# Local databases (don't ship dev SQLite files)
+*.db
+*.sqlite
+*.sqlite3
+*.db-wal
+*.db-shm
+
+# Node / tooling
+node_modules/
+npm-debug.log*
+
+# Env / compose
+.env
+docker-compose.*
+
+# Docs (not needed in image)
+*.md
+Documentation/
+docs/
+
+# IMPORTANT: Exclude the nested ESS folder from the HR build context
+ESSLeaveSystem/
+
+# Also exclude the accidentally nested duplicate under HRManagementSystem
+HRManagementSystem/ESSLeaveSystem/

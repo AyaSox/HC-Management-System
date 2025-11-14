@@ -1,0 +1,202 @@
+@model HRManagementSystem.Models.Employee
+
+@{
+    ViewData["Title"] = "Create Employee";
+}
+
+<h1>Create New Employee</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-8">
+        <form asp-action="Create" enctype="multipart/form-data" id="employeeCreateForm">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" id="confirmCreateFlag" value="false" />
+            
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group mb-3">
+                        <label asp-for="EmployeeNumber" class="form-label"></label>
+                        <input asp-for="EmployeeNumber" class="form-control" placeholder="e.g., EMP001" />
+                        <span asp-validation-for="EmployeeNumber" class="text-danger"></span>
+                        <small class="form-text text-muted">Unique employee identifier</small>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group mb-3">
+                        <label asp-for="FullName" class="form-label"></label>
+                        <input asp-for="FullName" class="form-control" />
+                        <span asp-validation-for="FullName" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group mb-3">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" class="form-control" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label asp-for="JobTitle" class="form-label"></label>
+                        <input asp-for="JobTitle" class="form-control" placeholder="e.g., Software Developer, HR Manager" />
+                        <span asp-validation-for="JobTitle" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label asp-for="EmploymentType" class="form-label"></label>
+                        <select asp-for="EmploymentType" class="form-select">
+                            <option value="Permanent">Permanent</option>
+                            <option value="Contract">Contract</option>
+                            <option value="Temporary">Temporary</option>
+                            <option value="Intern">Intern</option>
+                            <option value="Graduate">Graduate</option>
+                            <option value="Consultant">Consultant</option>
+                        </select>
+                        <span asp-validation-for="EmploymentType" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label asp-for="DepartmentId" class="form-label">Department</label>
+                        <select asp-for="DepartmentId" class="form-select" asp-items="ViewBag.DepartmentId">
+                            <option value="">Select Department</option>
+                        </select>
+                        <span asp-validation-for="DepartmentId" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label asp-for="LineManagerId" class="form-label"></label>
+                        <select asp-for="LineManagerId" class="form-select searchable-select" asp-items="ViewBag.LineManagerId">
+                            <option value="">No Line Manager</option>
+                        </select>
+                        <span asp-validation-for="LineManagerId" class="text-danger"></span>
+                        <small class="form-text text-muted">Select the person this employee reports to</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group mb-3">
+                        <label asp-for="DateHired" class="form-label"></label>
+                        <input asp-for="DateHired" class="form-control" type="date" />
+                        <span asp-validation-for="DateHired" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group mb-3">
+                        <label asp-for="DateOfBirth" class="form-label"></label>
+                        <input asp-for="DateOfBirth" class="form-control" type="date" />
+                        <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group mb-3">
+                        <label asp-for="Gender" class="form-label"></label>
+                        <select asp-for="Gender" class="form-select">
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <span asp-validation-for="Gender" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label asp-for="Salary" class="form-label"></label>
+                        <input asp-for="Salary" class="form-control" type="number" step="any" min="0" />
+                        <span asp-validation-for="Salary" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label asp-for="Status" class="form-label"></label>
+                        <select asp-for="Status" class="form-select">
+                            <option value="Active">Active</option>
+                            <option value="OnLeave">On Leave</option>
+                            <option value="Inactive">Inactive</option>
+                        </select>
+                        <span asp-validation-for="Status" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label asp-for="EmergencyContactName" class="form-label"></label>
+                        <input asp-for="EmergencyContactName" class="form-control" />
+                        <span asp-validation-for="EmergencyContactName" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label asp-for="EmergencyContactPhone" class="form-label"></label>
+                        <input asp-for="EmergencyContactPhone" class="form-control" />
+                        <span asp-validation-for="EmergencyContactPhone" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="ProfilePicture" class="form-label">Profile Picture</label>
+                <input asp-for="ProfilePicture" class="form-control" type="file" accept="image/*" />
+                <span asp-validation-for="ProfilePicture" class="text-danger"></span>
+                <small class="form-text text-muted">Upload a profile picture (JPG, PNG, GIF - Max 2MB)</small>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Create</button>
+                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@await Html.PartialAsync("~/Views/Shared/_ConfirmSaveModal.cshtml")
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('employeeCreateForm');
+            const confirmFlag = document.getElementById('confirmCreateFlag');
+
+            form.addEventListener('submit', function(e) {
+                if (!form.checkValidity()) { return; }
+                if (confirmFlag.value === 'true') { return; }
+                e.preventDefault();
+
+                const items = [
+                    ['Name', document.querySelector('input[name="FullName"]').value],
+                    ['Email', document.querySelector('input[name="Email"]').value],
+                    ['Department', document.querySelector('select[name="DepartmentId"] option:checked')?.text || 'Not selected'],
+                    ['Employment Type', document.querySelector('select[name="EmploymentType"] option:checked')?.text || '-'],
+                    ['Status', document.querySelector('select[name="Status"] option:checked')?.text || '-'],
+                    ['Line Manager', document.querySelector('select[name="LineManagerId"] option:checked')?.text || 'None'],
+                    ['Date Hired', document.querySelector('input[name="DateHired"]').value || '-'],
+                    ['Annual Salary', hrConfirm.formatCurrencyZA(parseFloat(document.querySelector('input[name="Salary"]').value || '0'))]
+                ];
+
+                hrConfirm.showCreate(items, () => {
+                    confirmFlag.value = 'true';
+                    form.submit();
+                }, 'Creating...');
+            });
+        });
+    </script>
+}

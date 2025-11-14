@@ -1,0 +1,116 @@
+@model HRManagementSystem.Models.Department
+
+@{
+    ViewData["Title"] = "Department Details";
+}
+
+<h1><i class="fas fa-building"></i> @Model.Name</h1>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Department Information</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-3">
+                        @Html.DisplayNameFor(model => model.Name)
+                    </dt>
+                    <dd class="col-sm-9">
+                        @Html.DisplayFor(model => model.Name)
+                    </dd>
+                    <dt class="col-sm-3">
+                        Employee Count
+                    </dt>
+                    <dd class="col-sm-9">
+                        @(Model.Employees?.Count ?? 0) employees
+                    </dd>
+                </dl>
+            </div>
+        </div>
+
+        @if (Model.Employees != null && Model.Employees.Any())
+        {
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="mb-0">Department Employees</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        @foreach (var employee in Model.Employees.Where(e => !e.IsDeleted))
+                        {
+                            <div class="col-md-6 mb-2">
+                                <div class="card border-light">
+                                    <div class="card-body py-2">
+                                        <div class="d-flex align-items-center">
+                                            @if (!string.IsNullOrEmpty(employee.ProfilePicturePath))
+                                            {
+                                                <img src="@employee.ProfilePicturePath" width="30" height="30" style="object-fit:cover;border-radius:50%" class="me-2" />
+                                            }
+                                            else
+                                            {
+                                                <div class="bg-secondary rounded-circle d-inline-flex align-items-center justify-content-center text-white me-2" style="width:30px;height:30px;font-size:12px;">
+                                                    @employee.FullName.Substring(0, 1).ToUpper()
+                                                </div>
+                                            }
+                                            <div>
+                                                <a asp-controller="Employees" asp-action="Details" asp-route-id="@employee.EmployeeId" class="text-decoration-none fw-bold">
+                                                    @employee.FullName
+                                                </a>
+                                                @if (!string.IsNullOrEmpty(employee.JobTitle))
+                                                {
+                                                    <br><small class="text-muted">@employee.JobTitle</small>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-chart-bar"></i> Quick Actions</h6>
+            </div>
+            <div class="card-body">
+                <a asp-controller="OrgChart" asp-action="Department" asp-route-id="@Model.DepartmentId" class="btn btn-primary btn-sm w-100 mb-2">
+                    <i class="fas fa-sitemap"></i> View Org Chart
+                </a>
+                <a asp-controller="Departments" asp-action="Analytics" class="btn btn-info btn-sm w-100 mb-2">
+                    <i class="fas fa-chart-line"></i> Department Analytics
+                </a>
+                <a asp-controller="Employees" asp-action="Index" asp-route-departmentId="@Model.DepartmentId" class="btn btn-outline-primary btn-sm w-100">
+                    <i class="fas fa-users"></i> View All Employees
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-3">
+    <a asp-action="Edit" asp-route-id="@Model?.DepartmentId" class="btn btn-warning">
+        <i class="fas fa-edit"></i> Edit
+    </a>
+    <a asp-action="Index" class="btn btn-secondary">
+        <i class="fas fa-list"></i> Back to List
+    </a>
+    @if (User.IsInRole("Admin"))
+    {
+        <a asp-action="Delete" asp-route-id="@Model?.DepartmentId" class="btn btn-danger">
+            <i class="fas fa-trash"></i> Delete
+        </a>
+    }
+</div>
+
+<style>
+    .fas {
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+    }
+</style>

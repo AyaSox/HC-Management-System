@@ -1,0 +1,62 @@
+@model HRManagementSystem.Models.Department
+
+@{
+    ViewData["Title"] = "Edit Department";
+}
+
+<h1>Edit Department</h1>
+
+<h4>Department</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit" id="departmentEditForm">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="DepartmentId" />
+            <input type="hidden" id="confirmDeptEditFlag" value="false" />
+            <div class="form-group mb-3">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@await Html.PartialAsync("~/Views/Shared/_ConfirmSaveModal.cshtml")
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('departmentEditForm');
+            const confirmFlag = document.getElementById('confirmDeptEditFlag');
+
+            const originalName = document.querySelector('input[name="Name"]').value || '';
+
+            form.addEventListener('submit', function(e) {
+                if (!form.checkValidity()) { return; }
+                if (confirmFlag.value === 'true') { return; }
+                e.preventDefault();
+
+                const currentName = document.querySelector('input[name="Name"]').value || '';
+                const rows = [];
+                if (originalName !== currentName) {
+                    rows.push(['Department Name', originalName || '-', currentName || '-']);
+                }
+
+                hrConfirm.showEdit(rows, rows.length === 0, () => {
+                    confirmFlag.value = 'true';
+                    form.submit();
+                }, 'Saving...');
+            });
+        });
+    </script>
+}

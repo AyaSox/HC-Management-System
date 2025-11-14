@@ -1,0 +1,339 @@
+@model HRManagementSystem.Models.LeaveType
+
+@{
+    ViewData["Title"] = $"Edit Leave Type - {Model.Name}";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-edit"></i> Edit Leave Type</h2>
+    <a asp-action="LeaveTypes" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Leave Types
+    </a>
+</div>
+
+<!-- Current Status Alert -->
+@if (!Model.IsActive)
+{
+    <div class="alert alert-warning">
+        <i class="fas fa-exclamation-triangle"></i>
+        <strong>Inactive Leave Type:</strong> This leave type is currently inactive and won't appear in employee applications.
+    </div>
+}
+
+<!-- Form Card -->
+<div class="card">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0"><i class="fas fa-edit"></i> Leave Type Information</h5>
+    </div>
+    <div class="card-body">
+        <form asp-action="EditLeaveType" asp-route-id="@Model.LeaveTypeId" method="post">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+            
+            <input type="hidden" asp-for="LeaveTypeId" />
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="Name" class="form-label">
+                            <i class="fas fa-tag"></i> Leave Type Name <span class="text-danger">*</span>
+                        </label>
+                        <input asp-for="Name" type="text" class="form-control" />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                        <div class="form-text">Choose a clear, descriptive name for this leave type.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="DefaultDaysPerYear" class="form-label">
+                            <i class="fas fa-calendar-day"></i> Default Days Per Year <span class="text-danger">*</span>
+                        </label>
+                        <input asp-for="DefaultDaysPerYear" type="number" class="form-control" min="0" max="365" />
+                        <span asp-validation-for="DefaultDaysPerYear" class="text-danger"></span>
+                        <div class="form-text">
+                            Standard allocation for new employees. 
+                            <strong>Note:</strong> Existing employee balances won't be affected.
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Color" class="form-label">
+                            <i class="fas fa-palette"></i> Display Color
+                        </label>
+                        <select asp-for="Color" class="form-select" onchange="updateColorPreview()">
+                            <option value="bg-primary">Primary (Blue)</option>
+                            <option value="bg-success">Success (Green)</option>
+                            <option value="bg-info">Info (Cyan)</option>
+                            <option value="bg-warning">Warning (Yellow)</option>
+                            <option value="bg-danger">Danger (Red)</option>
+                            <option value="bg-secondary">Secondary (Gray)</option>
+                            <option value="bg-dark">Dark (Black)</option>
+                        </select>
+                        <div class="form-text">
+                            Color used in the UI: 
+                            <span id="colorPreview" class="badge ms-2">Preview</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-cogs"></i> Leave Type Settings
+                        </label>
+                        
+                        <div class="form-check mb-2">
+                            <input asp-for="IsActive" type="checkbox" class="form-check-input" />
+                            <label asp-for="IsActive" class="form-check-label">
+                                <i class="fas fa-toggle-on text-success"></i> Active
+                            </label>
+                            <div class="form-text">Available for employees to select when applying for leave.</div>
+                        </div>
+
+                        <div class="form-check mb-2">
+                            <input asp-for="IsPaid" type="checkbox" class="form-check-input" />
+                            <label asp-for="IsPaid" class="form-check-label">
+                                <i class="fas fa-money-bill-wave text-success"></i> Paid Leave
+                            </label>
+                            <div class="form-text">Employee continues to receive salary during this leave.</div>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input asp-for="RequiresApproval" type="checkbox" class="form-check-input" />
+                            <label asp-for="RequiresApproval" class="form-check-label">
+                                <i class="fas fa-user-check text-warning"></i> Requires Manager Approval
+                            </label>
+                            <div class="form-text">Must be approved by line manager before being granted.</div>
+                        </div>
+                    </div>
+
+                    <!-- Preview Card -->
+                    <div class="card bg-light">
+                        <div class="card-header">
+                            <h6 class="mb-0"><i class="fas fa-eye"></i> Preview</h6>
+                        </div>
+                        <div class="card-body">
+                            <div id="leaveTypePreview">
+                                <span class="badge" id="previewBadge">@Model.Name</span>
+                                <div class="mt-2">
+                                    <small>
+                                        <i class="fas fa-calendar-day"></i> <span id="previewDays">@Model.DefaultDaysPerYear</span> days/year<br>
+                                        <i class="fas fa-money-bill-wave" id="previewPaid"></i> <span id="previewPaidText"></span><br>
+                                        <i class="fas fa-user-check" id="previewApproval"></i> <span id="previewApprovalText"></span>
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label">
+                    <i class="fas fa-align-left"></i> Description
+                </label>
+                <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+                <div class="form-text">Optional: Provide additional information about this leave type.</div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="d-grid gap-2 d-md-flex">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-save"></i> Update Leave Type
+                        </button>
+                        <a asp-action="LeaveTypes" class="btn btn-secondary btn-lg">
+                            <i class="fas fa-times"></i> Cancel Changes
+                        </a>
+                        @if (Model.IsActive)
+                        {
+                            <button type="button" class="btn btn-warning btn-lg ms-auto" onclick="confirmDeactivate()">
+                                <i class="fas fa-pause"></i> Deactivate
+                            </button>
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-success btn-lg ms-auto" onclick="confirmActivate()">
+                                <i class="fas fa-play"></i> Activate
+                            </button>
+                        }
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Usage Statistics Card -->
+<div class="card mt-4">
+    <div class="card-header bg-info text-white">
+        <h6 class="mb-0"><i class="fas fa-chart-bar"></i> Usage Statistics</h6>
+    </div>
+    <div class="card-body">
+        <div class="row text-center">
+            <div class="col-md-3">
+                <div class="border rounded p-3">
+                    <h4 class="text-primary">@Model.LeaveBalances?.Count ?? 0</h4>
+                    <small class="text-muted">Employee Balances</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="border rounded p-3">
+                    <h4 class="text-warning">@Model.LeaveApplications?.Count(la => la.Status == HRManagementSystem.Models.LeaveStatus.Pending) ?? 0</h4>
+                    <small class="text-muted">Pending Applications</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="border rounded p-3">
+                    <h4 class="text-success">@Model.LeaveApplications?.Count(la => la.Status == HRManagementSystem.Models.LeaveStatus.Approved) ?? 0</h4>
+                    <small class="text-muted">Approved Applications</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="border rounded p-3">
+                    <h4 class="text-info">@Model.LeaveApplications?.Count() ?? 0</h4>
+                    <small class="text-muted">Total Applications</small>
+                </div>
+            </div>
+        </div>
+        @if ((Model.LeaveApplications?.Count ?? 0) > 0)
+        {
+            <div class="mt-3 alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>Note:</strong> This leave type has existing applications. 
+                Deactivating will prevent new applications but won't affect existing ones.
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Change Impact Warning -->
+@if ((Model.LeaveBalances?.Count ?? 0) > 0)
+{
+    <div class="card mt-4">
+        <div class="card-header bg-warning text-dark">
+            <h6 class="mb-0"><i class="fas fa-exclamation-triangle"></i> Change Impact</h6>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-info mb-0">
+                <h6><i class="fas fa-info-circle"></i> What happens when you save changes:</h6>
+                <ul class="mb-0">
+                    <li><strong>Name/Description changes:</strong> Will be reflected immediately in all views</li>
+                    <li><strong>Default days changes:</strong> Only affects new employee balances (existing balances unchanged)</li>
+                    <li><strong>Approval setting changes:</strong> Affects new applications only</li>
+                    <li><strong>Deactivation:</strong> Prevents new applications, existing applications remain valid</li>
+                    <li><strong>Color changes:</strong> Updates UI display immediately</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+}
+
+<script>
+    function updateColorPreview() {
+        const select = document.querySelector('select[name="Color"]');
+        const preview = document.getElementById('colorPreview');
+        const previewBadge = document.getElementById('previewBadge');
+        
+        const selectedColor = select.value;
+        preview.className = `badge ${selectedColor} ms-2`;
+        previewBadge.className = `badge ${selectedColor}`;
+    }
+
+    function updatePreview() {
+        const name = document.querySelector('input[name="Name"]').value || '@Model.Name';
+        const days = document.querySelector('input[name="DefaultDaysPerYear"]').value || '@Model.DefaultDaysPerYear';
+        const isPaid = document.querySelector('input[name="IsPaid"]').checked;
+        const requiresApproval = document.querySelector('input[name="RequiresApproval"]').checked;
+
+        document.getElementById('previewBadge').textContent = name;
+        document.getElementById('previewDays').textContent = days;
+        
+        const paidIcon = document.getElementById('previewPaid');
+        const paidText = document.getElementById('previewPaidText');
+        if (isPaid) {
+            paidIcon.className = 'fas fa-money-bill-wave text-success';
+            paidText.textContent = 'Paid';
+        } else {
+            paidIcon.className = 'fas fa-hand-holding text-warning';
+            paidText.textContent = 'Unpaid';
+        }
+        
+        const approvalIcon = document.getElementById('previewApproval');
+        const approvalText = document.getElementById('previewApprovalText');
+        if (requiresApproval) {
+            approvalIcon.className = 'fas fa-user-check text-primary';
+            approvalText.textContent = 'Requires Approval';
+        } else {
+            approvalIcon.className = 'fas fa-user-times text-secondary';
+            approvalText.textContent = 'Auto-Approved';
+        }
+    }
+
+    function confirmDeactivate() {
+        if (confirm('Are you sure you want to deactivate this leave type? It will no longer be available for new leave applications.')) {
+            document.querySelector('input[name="IsActive"]').checked = false;
+            updatePreview();
+            alert('Leave type set to inactive. Click "Update Leave Type" to save this change.');
+        }
+    }
+
+    function confirmActivate() {
+        if (confirm('Are you sure you want to activate this leave type? It will become available for leave applications.')) {
+            document.querySelector('input[name="IsActive"]').checked = true;
+            updatePreview();
+            alert('Leave type set to active. Click "Update Leave Type" to save this change.');
+        }
+    }
+
+    // Initialize preview
+    document.addEventListener('DOMContentLoaded', function() {
+        updateColorPreview();
+        updatePreview();
+        
+        // Add event listeners for real-time preview
+        document.querySelector('input[name="Name"]').addEventListener('input', updatePreview);
+        document.querySelector('input[name="DefaultDaysPerYear"]').addEventListener('input', updatePreview);
+        document.querySelector('input[name="IsPaid"]').addEventListener('change', updatePreview);
+        document.querySelector('input[name="RequiresApproval"]').addEventListener('change', updatePreview);
+        document.querySelector('input[name="IsActive"]').addEventListener('change', updatePreview);
+    });
+</script>
+
+<style>
+    .fas {
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+    }
+    
+    .form-label .text-danger {
+        font-weight: bold;
+    }
+    
+    .form-check-label {
+        cursor: pointer;
+    }
+    
+    .form-check-input:checked {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+    
+    .card-header h6, .card-header h5 {
+        margin-bottom: 0;
+    }
+    
+    #leaveTypePreview .badge {
+        font-size: 0.9rem;
+        padding: 0.5rem 1rem;
+    }
+    
+    .border.rounded.p-3 {
+        transition: transform 0.2s;
+    }
+    
+    .border.rounded.p-3:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+</style>

@@ -1,0 +1,361 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+}
+
+/* --------------------------------------------------
+   Emerald Theme (Light) - subtle, modern, accessible
+   -------------------------------------------------- */
+:root {
+  --emerald-50: #ecfdf5;
+  --emerald-100: #d1fae5;
+  --emerald-200: #a7f3d0;
+  --emerald-300: #6ee7b7;
+  --emerald-400: #34d399;
+  --emerald-500: #10b981; /* primary */
+  --emerald-600: #059669; /* gradient start / hover */
+  --emerald-700: #047857;
+  --emerald-800: #065f46;
+  --emerald-900: #064e3b;
+}
+
+/* Focus rings use emerald instead of blue */
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus, .form-select:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem var(--emerald-500);
+  border-color: var(--emerald-500);
+}
+
+/* Emerald Navbar */
+.bg-emerald {
+  background: linear-gradient(90deg, var(--emerald-700), var(--emerald-600), var(--emerald-500));
+}
+
+.navbar.bg-emerald .navbar-brand,
+.navbar.bg-emerald .nav-link,
+.navbar.bg-emerald .navbar-text {
+  color: #ffffff !important;
+}
+
+.navbar.bg-emerald .nav-link:hover,
+.navbar.bg-emerald .dropdown-item:active {
+  color: #e8fff6 !important;
+}
+
+.navbar.bg-emerald .dropdown-menu {
+  border: none;
+  box-shadow: 0 8px 24px rgba(0,0,0,.12);
+}
+
+/* Buttons */
+.btn-emerald {
+  color: #fff;
+  background-color: var(--emerald-600);
+  border-color: var(--emerald-600);
+}
+.btn-emerald:hover {
+  color: #fff;
+  background-color: var(--emerald-700);
+  border-color: var(--emerald-700);
+}
+.btn-primary {
+  color: #fff;
+  background-color: var(--emerald-600);
+  border-color: var(--emerald-600);
+}
+.btn-primary:hover,
+.btn-primary:focus {
+  color: #fff;
+  background-color: var(--emerald-700);
+  border-color: var(--emerald-700);
+}
+.btn-outline-emerald {
+  color: var(--emerald-700);
+  border-color: var(--emerald-500);
+}
+.btn-outline-emerald:hover {
+  color: #fff;
+  background-color: var(--emerald-600);
+  border-color: var(--emerald-600);
+}
+/* Map outline-primary to emerald */
+.btn-outline-primary {
+  color: var(--emerald-700);
+  border-color: var(--emerald-500);
+}
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+  color: #fff;
+  background-color: var(--emerald-600);
+  border-color: var(--emerald-600);
+}
+/* Keep emerald style when dropdown is open (bootstrap adds .show) */
+.btn-outline-emerald.dropdown-toggle.show,
+.btn-outline-emerald:active,
+.btn-outline-emerald.active {
+  color: #fff !important;
+  background-color: var(--emerald-600) !important;
+  border-color: var(--emerald-600) !important;
+  box-shadow: none !important;
+}
+
+/* Link accents */
+.link-emerald { color: var(--emerald-700); }
+.link-emerald:hover { color: var(--emerald-600); }
+
+/* Cards and subtle elevation */
+.card {
+  border: none;
+  box-shadow: 0 6px 24px rgba(2, 6, 12, .06);
+  border-radius: 12px;
+}
+.card-header {
+  background-color: #fff;
+  border-bottom: 2px solid var(--emerald-50);
+}
+
+/* Tables */
+.table thead.table-dark { background-color: var(--emerald-700); }
+.badge-emerald { background-color: var(--emerald-600); }
+
+/* Primary color remapping to emerald for consistency */
+.text-primary { color: var(--emerald-600) !important; }
+.bg-primary { background-color: var(--emerald-600) !important; }
+.badge.bg-primary { background-color: var(--emerald-600) !important; }
+.link-primary { color: var(--emerald-700) !important; }
+.link-primary:hover { color: var(--emerald-600) !important; }
+
+/* Dark Theme Styles */
+[data-theme="dark"] {
+  --bs-body-bg: #1a1a1a;
+  --bs-body-color: #e0e0e0;
+  --bs-border-color: #404040;
+}
+
+[data-theme="dark"] body {
+  background-color: #1a1a1a;
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .navbar {
+  background-color: #2d2d2d !important;
+  border-bottom-color: #404040 !important;
+}
+
+/* Keep emerald accent in dark theme for interactive elements */
+[data-theme="dark"] .btn-emerald {
+  background-color: var(--emerald-700);
+  border-color: var(--emerald-700);
+}
+[data-theme="dark"] .btn-emerald:hover {
+  background-color: var(--emerald-600);
+}
+[data-theme="dark"] .btn-outline-emerald {
+  color: var(--emerald-300);
+  border-color: var(--emerald-600);
+}
+[data-theme="dark"] .btn-outline-emerald:hover {
+  color: #0b1f16;
+  background-color: var(--emerald-400);
+  border-color: var(--emerald-400);
+}
+
+[data-theme="dark"] .navbar-brand,
+[data-theme="dark"] .nav-link {
+  color: #e0e0e0 !important;
+}
+
+[data-theme="dark"] .nav-link:hover {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .card {
+  background-color: #2d2d2d;
+  border-color: #404040;
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .card-header {
+  background-color: #252525;
+  border-bottom-color: #404040;
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .table {
+  color: #e0e0e0;
+  border-color: #404040;
+}
+
+[data-theme="dark"] .table-striped > tbody > tr:nth-of-type(odd) > * {
+  background-color: #252525;
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .table-hover > tbody > tr:hover > * {
+  background-color: #353535;
+  color: #ffffff;
+}
+
+[data-theme="dark"] .table-dark {
+  background-color: #1a1a1a;
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .form-select {
+  background-color: #2d2d2d;
+  border-color: #404040;
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .form-control:focus,
+[data-theme="dark"] .form-select:focus {
+  background-color: #353535;
+  border-color: #258cfb;
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .form-control::placeholder {
+  color: #808080;
+}
+
+[data-theme="dark"] .btn-outline-secondary {
+  color: #e0e0e0;
+  border-color: #404040;
+}
+
+[data-theme="dark"] .btn-outline-secondary:hover {
+  background-color: #404040;
+  border-color: #404040;
+  color: #ffffff;
+}
+
+[data-theme="dark"] .dropdown-menu {
+  background-color: #2d2d2d;
+  border-color: #404040;
+}
+
+[data-theme="dark"] .dropdown-item {
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .dropdown-item:hover,
+[data-theme="dark"] .dropdown-item:focus {
+  background-color: #404040;
+  color: #ffffff;
+}
+
+[data-theme="dark"] .dropdown-header {
+  color: #b0b0b0;
+}
+
+[data-theme="dark"] .dropdown-divider {
+  border-top-color: #404040;
+}
+
+[data-theme="dark"] .alert {
+  border-color: #404040;
+}
+
+[data-theme="dark"] .alert-success {
+  background-color: #1e4620;
+  color: #8fd693;
+}
+
+[data-theme="dark"] .alert-danger {
+  background-color: #4a1e1e;
+  color: #f5a3a3;
+}
+
+[data-theme="dark"] .alert-warning {
+  background-color: #4a3e1e;
+  color: #f5d693;
+}
+
+[data-theme="dark"] .alert-info {
+  background-color: #1e3a4a;
+  color: #93d6f5;
+}
+
+[data-theme="dark"] .footer {
+  background-color: #2d2d2d;
+  border-top-color: #404040 !important;
+  color: #b0b0b0;
+}
+
+[data-theme="dark"] .text-muted {
+  color: #b0b0b0 !important;
+}
+
+[data-theme="dark"] .text-dark {
+  color: #e0e0e0 !important;
+}
+
+[data-theme="dark"] .border-bottom {
+  border-bottom-color: #404040 !important;
+}
+
+[data-theme="dark"] .border-top {
+  border-top-color: #404040 !important;
+}
+
+[data-theme="dark"] .modal-content {
+  background-color: #2d2d2d;
+  border-color: #404040;
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .modal-header,
+[data-theme="dark"] .modal-footer {
+  border-color: #404040;
+}
+
+[data-theme="dark"] .close {
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .list-group-item {
+  background-color: #2d2d2d;
+  border-color: #404040;
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .list-group-item:hover {
+  background-color: #353535;
+}
+
+[data-theme="dark"] hr {
+  border-top-color: #404040;
+}
+
+/* Theme toggle button styles */
+#theme-toggle {
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  font-size: 1.2rem;
+  padding: 0.5rem;
+  color: inherit;
+  transition: transform 0.3s ease;
+}
+
+#theme-toggle:hover {
+  transform: scale(1.1);
+}

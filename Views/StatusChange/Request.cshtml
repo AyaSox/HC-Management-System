@@ -1,0 +1,134 @@
+@model HRManagementSystem.Models.ViewModels.StatusChangeRequestViewModel
+
+@{
+    ViewData["Title"] = "Request Status Change";
+}
+
+<h2><i class="fas fa-exchange-alt"></i> Request Status Change</h2>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Status Change Request for @Model.EmployeeName</h5>
+            </div>
+            <div class="card-body">
+                <form asp-action="Request" method="post">
+                    <input type="hidden" asp-for="EmployeeId" />
+                    <input type="hidden" asp-for="EmployeeName" />
+                    <input type="hidden" asp-for="CurrentStatus" />
+                    <input type="hidden" asp-for="RequiresApproval" />
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label"><strong>Current Status</strong></label>
+                            <div class="form-control-plaintext">
+                                @switch (Model.CurrentStatus)
+                                {
+                                    case HRManagementSystem.Models.EmployeeStatus.Active:
+                                        <span class="badge bg-success fs-6"><i class="fas fa-check-circle"></i> Active</span>
+                                        break;
+                                    case HRManagementSystem.Models.EmployeeStatus.OnLeave:
+                                        <span class="badge bg-warning fs-6"><i class="fas fa-clock"></i> On Leave</span>
+                                        break;
+                                    case HRManagementSystem.Models.EmployeeStatus.Inactive:
+                                        <span class="badge bg-danger fs-6"><i class="fas fa-times-circle"></i> Inactive</span>
+                                        break;
+                                }
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="NewStatus" class="form-label"></label>
+                            <select asp-for="NewStatus" class="form-select">
+                                @foreach (HRManagementSystem.Models.EmployeeStatus status in Enum.GetValues<HRManagementSystem.Models.EmployeeStatus>())
+                                {
+                                    if (status != HRManagementSystem.Models.EmployeeStatus.OnLeave)
+                                    {
+                                        <option value="@status">@status</option>
+                                    }
+                                }
+                            </select>
+                            <span asp-validation-for="NewStatus" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Reason" class="form-label"></label>
+                        <textarea asp-for="Reason" class="form-control" rows="4" placeholder="Please provide a detailed reason for this status change. This information will be reviewed by an administrator and logged in the audit trail."></textarea>
+                        <span asp-validation-for="Reason" class="text-danger"></span>
+                        <div class="form-text">Minimum 10 characters required. This will be logged in the audit trail.</div>
+                    </div>
+
+                    @if (Model.RequiresApproval)
+                    {
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Admin Approval Required:</strong> This status change request will be sent to system administrators for approval.
+                        </div>
+                    }
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i> Submit Request
+                        </button>
+                        <a asp-controller="Employees" asp-action="Details" asp-route-id="@Model.EmployeeId" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-info-circle"></i> Status Change Policy</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-2"><i class="fas fa-check text-success"></i> All status changes require admin approval</li>
+                    <li class="mb-2"><i class="fas fa-check text-success"></i> Detailed reason must be provided</li>
+                    <li class="mb-2"><i class="fas fa-check text-success"></i> Changes are logged in audit trail</li>
+                    <li class="mb-2"><i class="fas fa-check text-success"></i> Notifications sent to relevant parties</li>
+                </ul>
+                
+                <hr>
+                
+                <h6>Status Definitions:</h6>
+                <ul class="list-unstyled small">
+                    <li><span class="badge bg-success">Active</span> - Currently working</li>
+                    <li><span class="badge bg-danger">Inactive</span> - Not currently working</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        // Prevent submission if new status is same as current
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const currentStatus = '@Model.CurrentStatus';
+            const newStatus = document.querySelector('select[name="NewStatus"]').value;
+            
+            if (currentStatus === newStatus) {
+                e.preventDefault();
+                alert('Please select a different status than the current one.');
+                return false;
+            }
+        });
+
+        // Auto-focus on reason field
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelector('textarea[name="Reason"]').focus();
+        });
+    </script>
+}
+
+<style>
+    .fas {
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+    }
+</style>

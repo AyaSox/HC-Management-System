@@ -1,0 +1,167 @@
+@model HRManagementSystem.Models.AuditLog
+
+@{
+    ViewData["Title"] = "Audit Log Details";
+}
+
+<h1>Audit Log Details</h1>
+
+<div class="card">
+    <div class="card-header">
+        <h4><i class="fas fa-history"></i> Audit Record #@Model.AuditLogId</h4>
+    </div>
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.AuditLogId)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.AuditLogId)
+            </dd>
+
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.TableName)
+            </dt>
+            <dd class="col-sm-9">
+                <span class="badge bg-primary">@Html.DisplayFor(model => model.TableName)</span>
+            </dd>
+
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.Action)
+            </dt>
+            <dd class="col-sm-9">
+                @switch (Model.Action)
+                {
+                    case "INSERT":
+                        <span class="badge bg-success">@Model.Action</span>
+                        break;
+                    case "UPDATE":
+                        <span class="badge bg-warning">@Model.Action</span>
+                        break;
+                    case "DELETE":
+                        <span class="badge bg-danger">@Model.Action</span>
+                        break;
+                    default:
+                        <span class="badge bg-secondary">@Model.Action</span>
+                        break;
+                }
+            </dd>
+
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.RecordId)
+            </dt>
+            <dd class="col-sm-9">
+                @if (Model.RecordId.HasValue)
+                {
+                    @Html.DisplayFor(model => model.RecordId)
+                }
+                else
+                {
+                    <span class="text-muted">N/A</span>
+                }
+            </dd>
+
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.UserName)
+            </dt>
+            <dd class="col-sm-9">
+                <strong style="color: black;">@Html.DisplayFor(model => model.UserName)</strong>
+            </dd>
+
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.UserId)
+            </dt>
+            <dd class="col-sm-9">
+                <code>@Html.DisplayFor(model => model.UserId)</code>
+            </dd>
+
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.Timestamp)
+            </dt>
+            <dd class="col-sm-9">
+                @Model.Timestamp.ToString("yyyy-MM-dd HH:mm:ss")
+                <small class="text-muted">(@Model.Timestamp.ToString("dddd, MMMM dd, yyyy"))</small>
+            </dd>
+        </dl>
+
+        @if (!string.IsNullOrEmpty(Model.Changes) && Model.Changes != "-")
+        {
+            <hr>
+            <h5><i class="fas fa-exchange-alt"></i> Change Summary</h5>
+            <div class="card bg-light">
+                <div class="card-body">
+                    @{
+                        var changes = Model.Changes.Split(';');
+                    }
+                    <ul class="list-unstyled mb-0">
+                        @foreach (var change in changes)
+                        {
+                            <li class="mb-2">
+                                <i class="fas fa-arrow-right text-primary me-2"></i>
+                                <span style="color: black;">@change.Trim()</span>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        }
+        else
+        {
+            <hr>
+            <h5><i class="fas fa-info-circle text-muted"></i> Change Summary</h5>
+            <div class="card bg-light">
+                <div class="card-body">
+                    <p class="text-muted mb-0">
+                        @if (Model.Action == "INSERT")
+                        {
+                            <span>New @Model.TableName.TrimEnd('s').ToLower() record was created.</span>
+                        }
+                        else if (Model.Action == "DELETE")
+                        {
+                            <span>@Model.TableName.TrimEnd('s').ToLower() record was deleted.</span>
+                        }
+                        else
+                        {
+                            <span>No specific changes were recorded for this update.</span>
+                        }
+                    </p>
+                </div>
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(Model.OldValues))
+        {
+            <hr>
+            <h5><i class="fas fa-arrow-left text-danger"></i> Old Values</h5>
+            <div class="card border-danger">
+                <div class="card-body">
+                    <pre style="white-space: pre-wrap; font-family: inherit; color: black;">@Model.OldValues</pre>
+                </div>
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(Model.NewValues))
+        {
+            <hr>
+            <h5><i class="fas fa-arrow-right text-success"></i> New Values</h5>
+            <div class="card border-success">
+                <div class="card-body">
+                    <pre style="white-space: pre-wrap; font-family: inherit; color: black;">@Model.NewValues</pre>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="mt-3">
+    <a asp-action="Index" class="btn btn-secondary">
+        <i class="fas fa-list"></i> Back to Audit Log
+    </a>
+</div>
+
+<style>
+    .fas {
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+    }
+</style>

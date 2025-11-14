@@ -1,0 +1,485 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+@if (!User.Identity!.IsAuthenticated)
+{
+    <!-- Hero Section for Non-Authenticated Users -->
+    <div class="hero-section">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-lg-6 text-white">
+                        <h1 class="hero-title fw-semibold mb-4 animate-fade-in">HR Management System</h1>
+                        <p class="lead mb-4 animate-fade-in-delay">
+                            Streamline your workforce management with our comprehensive employee and department management solution. 
+                            Built for modern HR teams.
+                        </p>
+                        <div class="d-flex gap-3 mb-4 animate-fade-in-delay-2">
+                            <a asp-controller="Account" asp-action="Login" class="btn btn-light btn-lg px-4">
+                                <i class="fas fa-sign-in-alt"></i> Login
+                            </a>
+                            <a asp-controller="Account" asp-action="Register" class="btn btn-outline-light btn-lg px-4">
+                                <i class="fas fa-user-plus"></i> Register
+                            </a>
+                        </div>
+                        <div class="demo-credentials animate-fade-in-delay-3">
+                            <small class="d-block mb-2"><i class="fas fa-key"></i> <strong>Demo Account:</strong></small>
+                            <code class="bg-white text-dark p-2 rounded d-inline-block">admin@hrsystem.com</code>
+                            <span class="mx-2">/</span>
+                            <code class="bg-white text-dark p-2 rounded d-inline-block">Admin@123</code>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 d-none d-lg-block">
+                        <div class="hero-illustration">
+                            <i class="fas fa-users-cog fa-10x text-white opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="features-section py-4">
+        <div class="container">
+            <div class="text-center mb-4">
+                <h2 class="features-title mb-2">Powerful Features for Modern HR Teams</h2>
+                <p class="lead text-muted small-text">Everything you need to manage your workforce efficiently</p>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="feature-card card p-4 shadow-sm h-100 hover-card border-0">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-users fa-3x text-primary"></i>
+                        </div>
+                        <h4 class="mb-3">Employee Management</h4>
+                        <p class="text-muted">Comprehensive employee records, profiles, advanced search, status tracking, and bulk operations with photo uploads.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card card p-4 shadow-sm h-100 hover-card border-0">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-building fa-3x text-success"></i>
+                        </div>
+                        <h4 class="mb-3">Department Analytics</h4>
+                        <p class="text-muted">Organize departments with employee assignments, detailed analytics, and real-time reporting capabilities.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card card p-4 shadow-sm h-100 hover-card border-0">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-chart-line fa-3x text-info"></i>
+                        </div>
+                        <h4 class="mb-3">Business Intelligence</h4>
+                        <p class="text-muted">View analytics, reports, recent hires, birthday notifications, and comprehensive business insights.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4 mt-2">
+                <div class="col-md-4">
+                    <div class="feature-card card p-4 shadow-sm h-100 hover-card border-0">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-file-export fa-3x text-warning"></i>
+                        </div>
+                        <h4 class="mb-3">Export & Reports</h4>
+                        <p class="text-muted">Export to Excel, PDF, and CSV. Generate comprehensive reports with one click.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card card p-4 shadow-sm h-100 hover-card border-0">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-sitemap fa-3x text-danger"></i>
+                        </div>
+                        <h4 class="mb-3">Organization Chart</h4>
+                        <p class="text-muted">Visual organization hierarchy with manager-employee relationships and reporting lines.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card card p-4 shadow-sm h-100 hover-card border-0">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-shield-alt fa-3x text-secondary"></i>
+                        </div>
+                        <h4 class="mb-3">Audit & Security</h4>
+                        <p class="text-muted">Complete audit trail, role-based access control, and secure data management.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Call to Action Section -->
+    <div class="cta-section py-5 text-white">
+        <div class="container text-center">
+            <h2 class="cta-title fw-semibold mb-3">Ready to Transform Your HR Management?</h2>
+            <p class="lead mb-4">Join modern HR teams using our platform to streamline their workforce management</p>
+            <a asp-controller="Account" asp-action="Login" class="btn btn-light btn-lg px-5">
+                <i class="fas fa-rocket"></i> Get Started Now
+            </a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="text-center mb-5">
+        <h1 class="display-4">Welcome to HR Management System</h1>
+        <p class="lead">Comprehensive employee and department management solution</p>
+    </div>
+
+    <!-- Global Search Bar -->
+    <div class="row justify-content-center mb-5">
+        <div class="col-md-8">
+            <div class="card shadow-sm search-card">
+                <div class="card-body p-3">
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-0">
+                            <i class="fas fa-search text-muted"></i>
+                        </span>
+                        <input type="text" class="form-control border-0 global-search" placeholder="Quick search: employees, departments, reports..." id="globalSearch">
+                        <button class="btn btn-outline-primary border-0" type="button" onclick="performGlobalSearch()">
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4 text-center">
+        <div class="col-md-3 mb-3">
+            <div class="card p-3 shadow-sm h-100">
+                <div class="h6">Total Employees</div>
+                <div class="display-6 text-primary">@ViewBag.TotalEmployees</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card p-3 shadow-sm h-100">
+                <div class="h6">Active Employees</div>
+                <div class="display-6 text-success">@ViewBag.ActiveEmployees</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card p-3 shadow-sm h-100">
+                <div class="h6">On Leave</div>
+                <div class="display-6 text-warning">@ViewBag.OnLeaveEmployees</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card p-3 shadow-sm h-100">
+                <div class="h6">Average Salary</div>
+                <div class="display-6 text-info">@ViewBag.AvgSalary</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row text-center mt-5 mb-4">
+        <div class="col-md-4">
+            <div class="card p-4 shadow-sm h-100 hover-card">
+                <div class="card-body">
+                    <i class="fas fa-users fa-3x text-primary mb-3"></i>
+                    <h4>Employees</h4>
+                    <p>Manage employee records, profiles, and information with advanced search, status tracking, and bulk operations</p>
+                    <a asp-controller="Employees" asp-action="Index" class="btn btn-primary btn-modern" style="color: black !important;">View Employees</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card p-4 shadow-sm h-100 hover-card">
+                <div class="card-body">
+                    <i class="fas fa-building fa-3x text-success mb-3"></i>
+                    <h4>Departments</h4>
+                    <p>Organize and manage company departments with employee assignments and analytics</p>
+                    <a asp-controller="Departments" asp-action="Index" class="btn btn-success btn-modern" style="color: black !important;">View Departments</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card p-4 shadow-sm h-100 hover-card">
+                <div class="card-body">
+                    <i class="fas fa-tachometer-alt fa-3x text-info mb-3"></i>
+                    <h4>Dashboard</h4>
+                    <p>View analytics, reports, recent hires, birthday notifications, and business intelligence</p>
+                    <a asp-controller="Dashboard" asp-action="Index" class="btn btn-info btn-modern">View Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4 p-4 bg-success text-white rounded-modern welcome-section">
+        <h4><i class="fas fa-check-circle"></i> Welcome back, 👋 @(User.IsInRole("Admin") ? "Admin" : "HR Manager")!</h4>
+        <p class="mb-3">You're logged in and ready to manage your HR system.</p>
+        <div class="btn-group">
+            <a asp-controller="Dashboard" asp-action="Index" class="btn btn-light btn-modern">
+                <i class="fas fa-chart-dashboard"></i> Go to Dashboard
+            </a>
+            <a asp-controller="Employees" asp-action="Index" class="btn btn-outline-light btn-modern">
+                <i class="fas fa-users"></i> Manage Employees
+            </a>
+        </div>
+    </div>
+}
+
+<style>
+    .fas, .fab {
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+    }
+    .fab {
+        font-family: "Font Awesome 5 Brands";
+        font-weight: 400;
+    }
+    
+    /* Hero Section Styles */
+    .hero-section {
+        position: relative;
+        min-height: 460px; /* reduce hero height */
+        /* Emerald gradient replacing purple */
+        background: linear-gradient(135deg, #047857 0%, #059669 60%, #10b981 100%);
+        /* Remove negative margins to avoid overlap with navbar */
+        margin: 0 0 40px 0;
+        padding: 72px 0 80px; /* tighter spacing */
+        overflow: hidden;
+    }
+    
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: 
+            radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+        pointer-events: none;
+    }
+    
+    .hero-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.2);
+    }
+    
+    .hero-content {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .hero-illustration {
+        text-align: center;
+        animation: float 6s ease-in-out infinite;
+    }
+    
+    @@keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+    }
+    
+    .animate-fade-in {
+        animation: fadeIn 1s ease-in;
+    }
+    
+    .animate-fade-in-delay {
+        animation: fadeIn 1s ease-in 0.3s both;
+    }
+    
+    .animate-fade-in-delay-2 {
+        animation: fadeIn 1s ease-in 0.6s both;
+    }
+    
+    .animate-fade-in-delay-3 {
+        animation: fadeIn 1s ease-in 0.9s both;
+    }
+    
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .demo-credentials code {
+        font-size: 0.9rem;
+        padding: 8px 12px !important;
+        border-radius: 6px !important;
+    }
+    
+    /* Features Section */
+    .features-section {
+        background: #f8f9fa;
+    }
+    
+    .feature-card {
+        transition: all 0.3s ease;
+        border-radius: 15px;
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+    }
+    
+    .feature-icon {
+        text-align: center;
+    }
+    
+    /* CTA Section */
+    .cta-section {
+        background: linear-gradient(135deg, #065f46 0%, #059669 60%, #10b981 100%);
+    }
+
+    /* Typography reductions for a calmer hero */
+    .hero-title {
+        font-size: clamp(2rem, 3vw + 1rem, 3rem);
+        line-height: 1.2;
+        letter-spacing: 0.2px;
+    }
+    .cta-title {
+        font-size: clamp(1.5rem, 2.2vw + .5rem, 2.25rem);
+    }
+    
+    /* Modern Card Styling */
+    .card {
+        border: none;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        border-radius: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .hover-card:hover {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        transform: translateY(-5px);
+    }
+    
+    /* Modern Button Styling */
+    .btn-modern {
+        border-radius: 50px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .btn-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    .btn-primary.btn-modern:hover {
+        background-color: #0056b3;
+        border-color: #0056b3;
+    }
+    
+    .btn-success.btn-modern:hover {
+        background-color: #157347;
+        border-color: #157347;
+    }
+    
+    .btn-info.btn-modern:hover {
+        background-color: #0dcaf0;
+        border-color: #0dcaf0;
+    }
+    
+    /* Welcome Section */
+    .welcome-section {
+        border-radius: 1rem;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+        margin-top: 2rem !important;
+    }
+    
+    .rounded-modern {
+        border-radius: 1rem !important;
+    }
+    
+    /* Global Search Styling */
+    .search-card {
+        border-radius: 50px;
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
+    
+    .search-card:hover {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.1);
+    }
+    
+    .global-search {
+        background: transparent;
+        font-size: 1.1rem;
+    }
+    
+    .global-search:focus {
+        box-shadow: none;
+        background: transparent;
+    }
+    
+    .global-search::placeholder {
+        color: #6c757d;
+        font-style: italic;
+    }
+    
+    /* Enhanced spacing */
+    .mb-5 {
+        margin-bottom: 3rem !important;
+    }
+    
+    /* Dark theme adjustments for hero */
+    [data-theme="dark"] .hero-section {
+        background: linear-gradient(135deg, #064e3b 0%, #065f46 60%, #047857 100%);
+    }
+    
+    [data-theme="dark"] .features-section {
+        background: #1a1a1a;
+    }
+    
+    [data-theme="dark"] .cta-section {
+        background: linear-gradient(135deg, #064e3b 0%, #065f46 60%, #047857 100%);
+    }
+</style>
+
+<script>
+function performGlobalSearch() {
+    const searchTerm = document.getElementById('globalSearch').value.trim().toLowerCase();
+    
+    if (!searchTerm) {
+        alert('Please enter a search term');
+        return;
+    }
+    
+    // Smart search routing
+    if (searchTerm.includes('employee') || searchTerm.includes('staff') || searchTerm.includes('worker')) {
+        window.location.href = '@Url.Action("Index", "Employees")';
+    } else if (searchTerm.includes('department') || searchTerm.includes('dept') || searchTerm.includes('division')) {
+        window.location.href = '@Url.Action("Index", "Departments")';
+    } else if (searchTerm.includes('dashboard') || searchTerm.includes('report') || searchTerm.includes('analytics')) {
+        window.location.href = '@Url.Action("Index", "Dashboard")';
+    } else if (searchTerm.includes('audit') || searchTerm.includes('log') || searchTerm.includes('history')) {
+        window.location.href = '@Url.Action("Index", "Audit")';
+    } else {
+        // Default to employee search with the term
+        window.location.href = '@Url.Action("Index", "Employees")?searchString=' + encodeURIComponent(searchTerm);
+    }
+}
+
+// Enable search on Enter key
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('globalSearch');
+    if (searchInput) {
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performGlobalSearch();
+            }
+        });
+    }
+});
+</script>
