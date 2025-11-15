@@ -51,10 +51,10 @@ namespace HRManagementSystem.Controllers
             ViewBag.Genders = genderData.Select(g => g.Gender).ToArray();
             ViewBag.GenderCounts = genderData.Select(g => g.Count).ToArray();
 
-            // Recent hires (last 30 days)
+            // Recent hires (last 30 days) - excluding soft-deleted
             var recentHiresQuery = _context.Employees
                 .AsNoTracking()
-                .Where(e => e.DateHired >= DateTime.Now.AddDays(-30))
+                .Where(e => e.DateHired >= DateTime.Now.AddDays(-30) && !e.IsDeleted)
                 .Include(e => e.Department);
 
             ViewBag.RecentHiresCount = await recentHiresQuery.CountAsync();
