@@ -22,16 +22,10 @@ namespace HRManagementSystem.Controllers
         {
             if (User?.Identity?.IsAuthenticated == true)
             {
-                var totalEmployees = await _context.Employees.AsNoTracking().CountAsync();
-                var activeEmployees = await _context.Employees.AsNoTracking().CountAsync(e => e.Status == EmployeeStatus.Active);
-                var today = DateTime.Today;
-                var onLeaveEmployees = await _context.LeaveApplications
-                    .AsNoTracking()
-                    .Where(l => l.Status == LeaveStatus.Approved && l.StartDate <= today && l.EndDate >= today)
-                    .Select(l => l.EmployeeId)
-                    .Distinct()
-                    .CountAsync();
-                var avgSalary = await _context.Employees.AsNoTracking().AverageAsync(e => e.Salary);
+                var totalEmployees = await _context.Employees.AsNoTracking().Where(e => !e.IsDeleted).CountAsync();
+                var activeEmployees = await _context.Employees.AsNoTracking().CountAsync(e => e.Status == EmployeeStatus.Active && !e.IsDeleted);
+                var onLeaveEmployees = await _context.Employees.AsNoTracking().CountAsync(e => e.Status == EmployeeStatus.OnLeave && !e.IsDeleted);
+                var avgSalary = await _context.Employees.AsNoTracking().Where(e => !e.IsDeleted).AverageAsync(e => e.Salary);
 
                 ViewBag.TotalEmployees = totalEmployees;
                 ViewBag.ActiveEmployees = activeEmployees;

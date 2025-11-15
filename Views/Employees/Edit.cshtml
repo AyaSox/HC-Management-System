@@ -127,19 +127,13 @@
                 <div class="col-md-6">
                     <div class="form-group mb-3">
                         <label asp-for="Status" class="form-label"></label>
-                        <select asp-for="Status" class="form-select" disabled>
+                        <select asp-for="Status" class="form-select">
                             <option value="Active">Active</option>
                             <option value="OnLeave">On Leave</option>
                             <option value="Inactive">Inactive</option>
                         </select>
-                        <!-- Hidden field to preserve status value -->
-                        <input type="hidden" asp-for="Status" />
                         <span asp-validation-for="Status" class="text-danger"></span>
-                        <div class="alert alert-info mt-2 py-2">
-                            <i class="fas fa-info-circle"></i>
-                            <strong>Status changes require approval.</strong><br>
-                            Use the <a asp-action="Details" asp-route-id="@Model.EmployeeId" class="alert-link">"Change Status" button on the employee details page</a> to request status changes.
-                        </div>
+                        <small class="form-text text-muted">Changes to status will update dashboard statistics</small>
                     </div>
                 </div>
             </div>

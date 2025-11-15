@@ -21,29 +21,28 @@ namespace HRManagementSystem.Controllers
         {
             var today = DateTime.Today;
 
-            // Summary statistics
-            var totalEmployees = await _context.Employees.AsNoTracking().CountAsync();
+            // Summary statistics - exclude soft-deleted employees
+            var totalEmployees = await _context.Employees.AsNoTracking().Where(e => !e.IsDeleted).CountAsync();
             var totalDepartments = await _context.Departments.AsNoTracking().CountAsync();
-            var avgSalaryDecimal = await _context.Employees.AsNoTracking().AverageAsync(e => e.Salary);
+            var avgSalaryDecimal = await _context.Employees.AsNoTracking().Where(e => !e.IsDeleted).AverageAsync(e => e.Salary);
 
             ViewBag.TotalEmployees = totalEmployees;
             ViewBag.TotalDepartments = totalDepartments;
             ViewBag.AvgSalary = avgSalaryDecimal.ToString("C2", CultureInfo.CurrentCulture);
 
-            // Employees per Department
+            // Employees per Department - exclude soft-deleted
             var deptData = await _context.Departments
                 .AsNoTracking()
-                .Include(d => d.Employees)
-                .Select(d => new { d.Name, Count = d.Employees.Count })
+                .Select(d => new { d.Name, Count = d.Employees.Count(e => !e.IsDeleted) })
                 .ToListAsync();
 
             ViewBag.DeptLabels = deptData.Select(d => d.Name).ToArray();
             ViewBag.DeptCounts = deptData.Select(d => d.Count).ToArray();
 
-            // Gender distribution
+            // Gender distribution - exclude soft-deleted
             var genderData = await _context.Employees
                 .AsNoTracking()
-                .Where(e => !string.IsNullOrEmpty(e.Gender))
+                .Where(e => !string.IsNullOrEmpty(e.Gender) && !e.IsDeleted)
                 .GroupBy(e => e.Gender)
                 .Select(g => new { Gender = g.Key, Count = g.Count() })
                 .ToListAsync();
@@ -63,10 +62,10 @@ namespace HRManagementSystem.Controllers
                 .Take(5)
                 .ToListAsync();
 
-            // Upcoming birthdays (next 30 days) – compute client-side compatible
+            // Upcoming birthdays (next 30 days) – compute client-side compatible - exclude soft-deleted
             var upcomingBirthdays = await _context.Employees
                 .AsNoTracking()
-                .Where(e => e.DateOfBirth.HasValue)
+                .Where(e => e.DateOfBirth.HasValue && !e.IsDeleted)
                 .Include(e => e.Department)
                 .ToListAsync();
 
@@ -83,9 +82,10 @@ namespace HRManagementSystem.Controllers
 
             ViewBag.UpcomingBirthdays = birthdayList;
 
-            // Upcoming anniversaries (next 30 days)
+            // Upcoming anniversaries (next 30 days) - exclude soft-deleted
             var employeeAnniversaries = await _context.Employees
                 .AsNoTracking()
+                .Where(e => !e.IsDeleted)
                 .Include(e => e.Department)
                 .ToListAsync();
 
@@ -108,9 +108,10 @@ namespace HRManagementSystem.Controllers
 
             ViewBag.UpcomingAnniversaries = anniversaryList;
 
-            // Employee status breakdown
+            // Employee status breakdown - exclude soft-deleted
             var statusData = await _context.Employees
                 .AsNoTracking()
+                .Where(e => !e.IsDeleted)
                 .GroupBy(e => e.Status)
                 .Select(g => new { Status = g.Key.ToString(), Count = g.Count() })
                 .ToListAsync();
@@ -118,7 +119,7 @@ namespace HRManagementSystem.Controllers
             ViewBag.StatusLabels = statusData.Select(s => s.Status).ToArray();
             ViewBag.StatusCounts = statusData.Select(s => s.Count).ToArray();
 
-            // Upcoming leave (next 30 days): Approved requests that are ongoing or start soon
+            // Upcoming leave (next 30 days): Show employees with Status = OnLeave or approved leave applications
             var upcomingLeave = await _context.LeaveApplications
                 .AsNoTracking()
                 .Where(la => la.Status == LeaveStatus.Approved
