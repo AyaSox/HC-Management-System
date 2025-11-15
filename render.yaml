@@ -1,0 +1,20 @@
+# Render Blueprint - HR Management System Only
+services:
+  # HR Management System - Employee and Department Management
+  - type: web
+    name: hr-management-system
+    runtime: docker
+    plan: free
+    region: oregon
+    branch: main
+    rootDir: .
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ASPNETCORE_URLS
+        value: http://+:8080
+      - key: ConnectionStrings__DefaultConnection
+        value: Data Source=/tmp/hrmanagement.db
+    buildCommand: echo "Building HR Management System"
+    startCommand: dotnet HRManagementSystem.dll
