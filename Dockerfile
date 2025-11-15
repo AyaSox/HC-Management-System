@@ -2,16 +2,12 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copy project files from root level (not from a subfolder)
-COPY *.csproj ./
-COPY HRManagement.Shared/*.csproj ./HRManagement.Shared/
-RUN dotnet restore HRManagementSystem.csproj
-
-# Copy the rest of the HR app
+# Copy everything to preserve project structure
 COPY . .
 
-# Publish
-RUN dotnet publish HRManagementSystem.csproj -c Release -o /app/out --no-restore
+# Restore and build the main project
+RUN dotnet restore "HRManagementSystem.csproj"
+RUN dotnet publish "HRManagementSystem.csproj" -c Release -o /app/out --no-restore
 
 # Runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
