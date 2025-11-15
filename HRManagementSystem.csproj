@@ -32,7 +32,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\HRManagement.Shared\HRManagement.Shared.csproj" />
+    <ProjectReference Include="HRManagement.Shared\HRManagement.Shared.csproj" />
   </ItemGroup>
 
 </Project>
