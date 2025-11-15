@@ -2,16 +2,16 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Use the HRManagementSystem folder as the Docker build context in Render
-# so these COPY paths are correct.
-COPY HRManagementSystem/HRManagementSystem.csproj ./
+# Copy project files from root level (not from a subfolder)
+COPY *.csproj ./
+COPY HRManagement.Shared/*.csproj ./HRManagement.Shared/
 RUN dotnet restore HRManagementSystem.csproj
 
 # Copy the rest of the HR app
 COPY . .
 
 # Publish
-RUN dotnet publish -c Release -o /app/out --no-restore
+RUN dotnet publish HRManagementSystem.csproj -c Release -o /app/out --no-restore
 
 # Runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
