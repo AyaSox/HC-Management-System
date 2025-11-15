@@ -9,6 +9,7 @@ namespace HRManagementSystem.Services
         private readonly HttpClient _httpClient;
         private readonly ILogger<ESSLeaveApiClient> _logger;
         private readonly IConfiguration _configuration;
+        private readonly JsonSerializerOptions _jsonOptions;
 
         public ESSLeaveApiClient(HttpClient httpClient, ILogger<ESSLeaveApiClient> logger, IConfiguration configuration)
         {
@@ -19,6 +20,11 @@ namespace HRManagementSystem.Services
             // Configure base URL from environment variable or config
             var baseUrl = _configuration["ESS_LEAVE_API_URL"] ?? "http://localhost:5100";
             _httpClient.BaseAddress = new Uri(baseUrl);
+            
+            _jsonOptions = new JsonSerializerOptions 
+            { 
+                PropertyNameCaseInsensitive = true 
+            };
         }
 
         public async Task<ApiResponse<List<LeaveBalance>>> GetEmployeeLeaveBalancesAsync(int employeeId, int year)
@@ -29,7 +35,7 @@ namespace HRManagementSystem.Services
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
-                    var result = JsonSerializer.Deserialize<ApiResponse<List<LeaveBalance>>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    var result = JsonSerializer.Deserialize<ApiResponse<List<LeaveBalance>>>(content, _jsonOptions);
                     return result ?? new ApiResponse<List<LeaveBalance>> { Success = false, Message = "Failed to deserialize response" };
                 }
                 
@@ -61,7 +67,7 @@ namespace HRManagementSystem.Services
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
-                    var result = JsonSerializer.Deserialize<ApiResponse<List<LeaveApplication>>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    var result = JsonSerializer.Deserialize<ApiResponse<List<LeaveApplication>>>(content, _jsonOptions);
                     return result ?? new ApiResponse<List<LeaveApplication>> { Success = false, Message = "Failed to deserialize response" };
                 }
                 
@@ -85,6 +91,38 @@ namespace HRManagementSystem.Services
             }
         }
 
+        public async Task<ApiResponse<List<LeaveApplication>>> GetPendingLeaveApplicationsForManagerAsync(int managerId)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"api/LeaveApplications/manager/{managerId}/pending");
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+                    var result = JsonSerializer.Deserialize<ApiResponse<List<LeaveApplication>>>(content, _jsonOptions);
+                    return result ?? new ApiResponse<List<LeaveApplication>> { Success = false, Message = "Failed to deserialize response" };
+                }
+                
+                _logger.LogWarning($"ESS Leave API returned {response.StatusCode} for GetPendingLeaveApplicationsForManager");
+                return new ApiResponse<List<LeaveApplication>> 
+                { 
+                    Success = false, 
+                    Message = $"API returned status code: {response.StatusCode}",
+                    Data = new List<LeaveApplication>()
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error calling ESS Leave API - GetPendingLeaveApplicationsForManager");
+                return new ApiResponse<List<LeaveApplication>> 
+                { 
+                    Success = false, 
+                    Message = "Unable to connect to Leave API. Feature temporarily unavailable.",
+                    Data = new List<LeaveApplication>()
+                };
+            }
+        }
+
         public async Task<ApiResponse<List<LeaveType>>> GetLeaveTypesAsync()
         {
             try
@@ -93,7 +131,7 @@ namespace HRManagementSystem.Services
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
-                    var result = JsonSerializer.Deserialize<ApiResponse<List<LeaveType>>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    var result = JsonSerializer.Deserialize<ApiResponse<List<LeaveType>>>(content, _jsonOptions);
                     return result ?? new ApiResponse<List<LeaveType>> { Success = false, Message = "Failed to deserialize response" };
                 }
                 
@@ -121,14 +159,14 @@ namespace HRManagementSystem.Services
         {
             try
             {
-                var jsonContent = JsonSerializer.Serialize(request);
+                var jsonContent = JsonSerializer.Serialize(request, _jsonOptions);
                 var content = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
                 
                 var response = await _httpClient.PostAsync("api/LeaveApplications", content);
                 if (response.IsSuccessStatusCode)
                 {
                     var responseContent = await response.Content.ReadAsStringAsync();
-                    var result = JsonSerializer.Deserialize<ApiResponse<LeaveApplication>>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    var result = JsonSerializer.Deserialize<ApiResponse<LeaveApplication>>(responseContent, _jsonOptions);
                     return result ?? new ApiResponse<LeaveApplication> { Success = false, Message = "Failed to deserialize response" };
                 }
                 
@@ -150,19 +188,52 @@ namespace HRManagementSystem.Services
             }
         }
 
+        public async Task<ApiResponse<LeaveApplication>> ApproveLeaveApplicationAsync(int applicationId, LeaveApprovalRequest request)
+        {
+            try
+            {
+                var jsonContent = JsonSerializer.Serialize(request, _jsonOptions);
+                var content = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
+                
+                var response = await _httpClient.PostAsync($"api/LeaveApplications/{applicationId}/approve", content);
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    var result = JsonSerializer.Deserialize<ApiResponse<LeaveApplication>>(responseContent, _jsonOptions);
+                    return result ?? new ApiResponse<LeaveApplication> { Success = false, Message = "Failed to deserialize response" };
+                }
+                
+                _logger.LogWarning($"ESS Leave API returned {response.StatusCode} for ApproveLeaveApplication");
+                return new ApiResponse<LeaveApplication> 
+                { 
+                    Success = false, 
+                    Message = $"Failed to approve leave application. API returned: {response.StatusCode}"
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error calling ESS Leave API - ApproveLeaveApplication");
+                return new ApiResponse<LeaveApplication> 
+                { 
+                    Success = false, 
+                    Message = "Unable to connect to Leave API. Please try again later."
+                };
+            }
+        }
+
         public async Task<ApiResponse<List<LeaveBalance>>> InitializeLeaveBalancesAsync(int employeeId, int year)
         {
             try
             {
                 var request = new { EmployeeId = employeeId, Year = year };
-                var jsonContent = JsonSerializer.Serialize(request);
+                var jsonContent = JsonSerializer.Serialize(request, _jsonOptions);
                 var content = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
                 
                 var response = await _httpClient.PostAsync("api/LeaveBalances/initialize", content);
                 if (response.IsSuccessStatusCode)
                 {
                     var responseContent = await response.Content.ReadAsStringAsync();
-                    var result = JsonSerializer.Deserialize<ApiResponse<List<LeaveBalance>>>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    var result = JsonSerializer.Deserialize<ApiResponse<List<LeaveBalance>>>(responseContent, _jsonOptions);
                     return result ?? new ApiResponse<List<LeaveBalance>> { Success = false, Message = "Failed to deserialize response" };
                 }
                 
