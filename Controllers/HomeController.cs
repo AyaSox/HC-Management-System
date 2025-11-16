@@ -46,36 +46,5 @@ namespace HRManagementSystem.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
-
-        [HttpGet("set-culture")]
-        public IActionResult SetCulture(string culture, string returnUrl)
-        {
-            // Validate culture
-            if (string.IsNullOrEmpty(culture) || 
-                (culture != "en-ZA" && culture != "en-US"))
-            {
-                culture = "en-ZA"; // Default
-            }
-
-            // Set culture cookie
-            Response.Cookies.Append(
-                ".AspNetCore.Culture",
-                $"c={culture}|uic={culture}",
-                new CookieOptions 
-                { 
-                    Expires = DateTimeOffset.UtcNow.AddYears(1),
-                    IsEssential = true,
-                    Path = "/"
-                }
-            );
-
-            // Redirect back to the page they came from
-            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-            {
-                return Redirect(returnUrl);
-            }
-
-            return RedirectToAction(nameof(Index));
-        }
     }
 }
