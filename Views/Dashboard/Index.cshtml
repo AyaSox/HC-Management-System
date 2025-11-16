@@ -36,48 +36,6 @@
             <div class="display-6 text-warning">@ViewBag.RecentHiresCount</div>
         </div>
     </div>
-    <div class="col-md-6">
-        <div class="card shadow-sm">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-plane-departure me-1"></i>
-                    Upcoming Leave (next 30 days)
-                </h5>
-            </div>
-            <div class="card-body">
-                @{
-                    var upcomingLeave = (List<HRManagementSystem.Models.LeaveApplication>)ViewBag.UpcomingLeave ?? new();
-                }
-                @if (upcomingLeave.Any())
-                {
-                    <div class="list-group list-group-flush">
-                        @foreach (var item in upcomingLeave)
-                        {
-                            var isOngoing = DateTime.Today >= item.StartDate && DateTime.Today <= item.EndDate;
-                            <div class="list-group-item d-flex justify-content-between align-items-center upcoming-leave-item">
-                                <div>
-                                    <strong style="color:black;">@item.Employee.FullName</strong>
-                                    <br>
-                                    <small class="text-muted">@item.Employee.Department?.Name</small>
-                                </div>
-                                <div class="text-end">
-                                    <small class="badge bg-light text-dark border me-2">@item.LeaveType.Name</small>
-                                    <small class="@(isOngoing ? "text-danger fw-semibold" : "text-muted")">
-                                        @item.StartDate.ToString("MMM dd") - @item.EndDate.ToString("MMM dd")
-                                        @(isOngoing ? " (ongoing)" : "")
-                                    </small>
-                                </div>
-                            </div>
-                        }
-                    </div>
-                }
-                else
-                {
-                    <p class="text-muted">No upcoming approved leave in the next 30 days.</p>
-                }
-            </div>
-        </div>
-    </div>
 </div>
 
 <!-- New Widgets Row -->
@@ -363,7 +321,7 @@
         font-weight: 900;
     }
 
-    /* ?? Magical Birthday Animations ?? */
+    /* 🎂 Magical Birthday Animations 🎂 */
     .birthday-widget {
         position: relative;
         overflow: hidden;
@@ -415,7 +373,7 @@
         color: #d32f2f;
     }
 
-    /* ?? Anniversary Animations ?? */
+    /* 🏆 Anniversary Animations 🏆 */
     .anniversary-widget {
         position: relative;
         overflow: hidden;
