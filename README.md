@@ -19,7 +19,7 @@ Key Features
 - Dashboard: recent hires, birthdays, anniversaries, status breakdown, dept distribution
 - Exports: Excel, CSV, and PDF (QuestPDF)
 - Background jobs (Hangfire): birthdays, anniversaries, reports
-- Localization: en-ZA (default) and en-US via /set-culture endpoint
+- Localisation: en-ZA (default) and en-US via /set-culture endpoint
 - API: Employees API (+ Swagger in Development)
 
 Tech Stack
@@ -40,21 +40,13 @@ The repository includes screenshots under `docs/screenshots/`.
 Getting Started (Local)
 Prerequisites: .NET 8 SDK
 
-1) From the project folder
-```
-dotnet restore
-dotnet run
-```
-2) First run automatically creates the SQLite database and seeds demo data/roles.
-3) Browse to http://localhost:5000 or the URL shown in the console.
-
 Project Structure (selected)
-- `Models/` — core domain models (Employee, Department, StatusChangeRequest)
-- `Data/` — EF Core contexts and seeding (`AppDbContext`, `DemoDataSeeder`)
-- `Services/` — background jobs and utilities
-- `Controllers/` — MVC controllers for pages and APIs
-- `Views/` — Razor views (Razor Pages/MVC)
-- `wwwroot/` — static assets
+- `Models/` â€” core domain models (Employee, Department, StatusChangeRequest)
+- `Data/` â€” EF Core contexts and seeding (`AppDbContext`, `DemoDataSeeder`)
+- `Services/` â€” background jobs and utilities
+- `Controllers/` â€” MVC controllers for pages and APIs
+- `Views/` â€” Razor views (Razor Pages/MVC)
+- `wwwroot/` â€” static assets
 
 Status Tracking (Important)
 - The `Status` field is an editable dropdown on the Employee edit form.
@@ -62,30 +54,13 @@ Status Tracking (Important)
 - Homepage and Dashboard statistics read directly from this field.
 - Soft-deleted employees (`IsDeleted = true`) are excluded from all stats.
 
-Localization
+Localisation
 - Toggle via the Language menu (top-right).
 - Endpoint: `/set-culture?culture=en-ZA|en-US&returnUrl={path}`.
 - Culture is stored in the `.AspNetCore.Culture` cookie for 1 year.
 
-Docker (Local)
-```
-# Build & run
-docker build -t hc-management-system .
-docker run -p 8080:8080 -e ASPNETCORE_ENVIRONMENT=Production -e ASPNETCORE_URLS=http://+:8080 -e ConnectionStrings__DefaultConnection="Data Source=/tmp/hrmanagement.db" hc-management-system
-```
-
 Render Deployment
-This repo ships with a root-level Dockerfile and a single-service `render.yaml` for the HR app only.
+This repo ships with a root-level Dockerfile and a single-service `render.yaml` for the HR app.
 
-Environment variables (Render):
-- `ASPNETCORE_ENVIRONMENT=Production`
-- `ASPNETCORE_URLS=http://+:8080`
-- `ConnectionStrings__DefaultConnection=Data Source=/tmp/hrmanagement.db`
 
-Notes
-- Free-tier Render instances are ephemeral; SQLite resets on redeploy/restart.
-- Hangfire uses in-memory storage for demo.
-- Lock down Hangfire dashboard for production use.
 
-License
-Community/demo usage. Adapt as needed.
